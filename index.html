@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CARIAN - Box Location Finder</title>
+
+    <!-- Mobile Web App & iOS Home Screen Icon Config -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CARIAN">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f172a">
+
+    <style>
+        :root {
+            --bg-main: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-input: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --border-color: #e2e8f0;
+            --header-bg: #0f172a;
+            --header-text: #ffffff;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent-green: #10b981;
+            --whatsapp-green: #25d366;
+            --whatsapp-hover: #128c7e;
+            --danger-bg: #fef2f2;
+            --danger-border: #fecaca;
+            --danger-text: #991b1b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-light: #64748b;
+            --border-color: #334155;
+            --header-bg: #020617;
+            --header-text: #ffffff;
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --accent-green: #34d399;
+            --whatsapp-green: #25d366;
+            --whatsapp-hover: #128c7e;
+            --danger-bg: #450a0a;
+            --danger-border: #7f1d1d;
+            --danger-text: #fca5a5;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        header {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            box-shadow: var(--shadow);
+            padding: 12px 16px;
+        }
+
+        .header-container {
+            max-width: 480px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-logo {
+            background-color: var(--primary);
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 20px;
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            line-height: 1.1;
+        }
+
+        .brand-text p {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 6px 10px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-size: 16px;
+            height: 38px;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #f59e0b;
+            position: absolute;
+            top: 6px;
+            right: 6px;
+        }
+
+        .status-dot.online { background-color: #10b981; }
+        .status-dot.error { background-color: #ef4444; }
+
+        main {
+            max-width: 480px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex-grow: 1;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .search-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            font-size: 24px;
+            font-weight: 800;
+            padding: 12px 42px 12px 16px;
+            background-color: var(--bg-input);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            outline: none;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            background-color: var(--bg-card);
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: none;
+        }
+
+        .clear-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 6px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 40;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .autocomplete-item {
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover, .autocomplete-item.active {
+            background-color: var(--bg-input);
+            color: var(--primary);
+        }
+
+        .autocomplete-sub {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .history-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-title {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+        }
+
+        .history-clear-btn {
+            background: none;
+            border: none;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .history-clear-btn:hover {
+            color: var(--danger-text);
+        }
+
+        .history-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .history-pill {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .history-pill:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .state-view {
+            text-align: center;
+            padding: 32px 16px;
+        }
+
+        .state-icon-box {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 12px auto;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .state-icon-box svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .state-initial .state-icon-box {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .state-not-found .state-icon-box {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .state-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .state-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        .diagnostic-box {
+            margin-top: 12px;
+            padding: 10px;
+            background-color: var(--danger-bg);
+            border: 1px solid var(--danger-border);
+            border-radius: var(--radius-md);
+            color: var(--danger-text);
+            font-size: 11px;
+            text-align: left;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .found-header {
+            background-color: var(--primary);
+            color: #ffffff;
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+            margin-bottom: 12px;
+        }
+
+        .found-label {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        .found-id {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            max-width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .coord-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            box-shadow: var(--shadow);
+        }
+
+        .coord-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .coord-val {
+            font-size: 20px;
+            font-weight: 900;
+            word-break: break-all;
+        }
+
+        .coord-val.highlight-blue { color: var(--primary); }
+        .coord-val.highlight-green { color: var(--accent-green); }
+
+        /* Action Button Styling */
+        .btn-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 800;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s ease, background-color 0.2s ease;
+        }
+
+        .btn-action:active {
+            transform: scale(0.98);
+        }
+
+        .btn-action svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .btn-copy {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-copy:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: var(--bg-card);
+            width: 100%;
+            max-width: 480px;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 24px;
+            max-height: 85vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.open .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .close-btn svg { width: 24px; height: 24px; }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-main);
+            font-size: 12px;
+            font-family: monospace;
+            resize: vertical;
+            outline: none;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background-color: var(--primary);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 14px;
+            padding: 12px;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--header-bg);
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 100;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        .toast-notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="brand-box">
+                <div class="brand-logo">C</div>
+                <div class="brand-text">
+                    <h1 id="i18n-title">CARIAN</h1>
+                    <p id="i18n-subtitle">Box Location Finder</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="lang-toggle-btn" class="icon-btn" title="Toggle Language">
+                    <span id="lang-flag-icon">🇬🇧</span>
+                </button>
+                <button id="theme-toggle-btn" class="icon-btn" title="Toggle Theme">
+                    <svg id="theme-icon-sun" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="hidden">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <svg id="theme-icon-moon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
+                <button id="open-settings-btn" class="icon-btn" title="Settings">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span id="sync-status-dot" class="status-dot"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            <label for="search-input" id="i18n-enter-box-id" class="search-label">ENTER BOX ID</label>
+            <div class="search-wrapper">
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    placeholder="3001/1/1" 
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="characters"
+                    spellcheck="false"
+                    class="search-input"
+                >
+                <button id="clear-btn" class="clear-btn" type="button">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+                <div id="autocomplete-list" class="autocomplete-dropdown hidden"></div>
+            </div>
+
+            <!-- Recent Searches Section -->
+            <div id="history-container" class="history-section hidden">
+                <div class="history-header">
+                    <span id="i18n-recent-searches" class="history-title">RECENT SEARCHES</span>
+                    <button id="history-clear-btn" class="history-clear-btn" type="button">CLEAR</button>
+                </div>
+                <div id="history-pills" class="history-pills"></div>
+            </div>
+
+            <div class="meta-info">
+                <span id="records-count-label">Loading database...</span>
+                <span id="last-sync-time">Synced</span>
+            </div>
+        </div>
+
+        <div id="result-container">
+            <!-- Initial State -->
+            <div id="state-initial" class="card state-view state-initial">
+                <div class="state-icon-box">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <div id="i18n-ready-title" class="state-title">Ready to Search</div>
+                <div id="i18n-ready-desc" class="state-desc">Type any Box ID above (e.g. <strong>3001/1/1</strong>) to locate its position.</div>
+            </div>
+
+            <!-- Not Found State -->
+            <div id="state-not-found" class="card state-view state-not-found hidden">
+                <div class="state-icon-box">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <div id="i18n-not-found-title" class="state-title" style="color: var(--danger-text)">Box Not Found</div>
+                <div id="not-found-msg" class="state-desc">No match found for this Box ID.</div>
+                <div id="not-found-diag" class="diagnostic-box hidden"></div>
+            </div>
+
+            <!-- Found State -->
+            <div id="state-found" class="hidden">
+                <div class="found-header">
+                    <div>
+                        <div id="i18n-box-id-found" class="found-label">BOX ID FOUND</div>
+                        <div id="res-box-id" class="found-id">---</div>
+                    </div>
+                    <div id="res-sheet-tab" class="tab-badge">Sheet</div>
+                </div>
+
+                <div class="grid-2x2">
+                    <div class="coord-card">
+                        <span id="i18n-label-rack" class="coord-label">RACK</span>
+                        <span id="res-rack" class="coord-val highlight-blue">---</span>
+                    </div>
+                    <div class="coord-card">
+                        <span id="i18n-label-shelf" class="coord-label">SHELF</span>
+                        <span id="res-shelf" class="coord-val highlight-green">---</span>
+                    </div>
+                    <div class="coord-card">
+                        <span id="i18n-label-room" class="coord-label">ROOM</span>
+                        <span id="res-room" class="coord-val">---</span>
+                    </div>
+                    <div class="coord-card">
+                        <span id="i18n-label-level" class="coord-label">LEVEL</span>
+                        <span id="res-level" class="coord-val">---</span>
+                    </div>
+                </div>
+
+                <!-- One-Tap Copy Location Button -->
+                <button id="copy-btn" class="btn-action btn-copy" type="button">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                    </svg>
+                    <span id="i18n-copy-location">Copy Location</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div id="i18n-settings-title" class="modal-title">Sync & Settings</div>
+                <button id="close-settings-btn" class="close-btn">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="sync-error-banner" class="diagnostic-box hidden" style="margin-bottom: 16px;"></div>
+
+            <div class="form-group">
+                <label id="i18n-script-url-label" class="form-label">Google Apps Script URL / Sheet Link</label>
+                <textarea 
+                    id="sheet-url-input" 
+                    rows="3" 
+                    placeholder="https://script.google.com/macros/s/.../exec" 
+                    class="form-textarea"
+                ></textarea>
+            </div>
+
+            <button id="save-sync-btn" class="btn-primary">Sync Data Now</button>
+
+            <div style="border-top: 1px solid var(--border-color); margin-top: 20px; padding-top: 16px;">
+                <label id="i18n-csv-label" class="form-label">Fallback Manual CSV Upload</label>
+                <input type="file" id="csv-file-input" accept=".csv" style="font-size: 12px; color: var(--text-muted); width: 100%;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast-notification" class="toast-notification">Location copied!</div>
+
+    <script>
+        const TRANSLATIONS = {
+            en: {
+                title: "CARIAN",
+                subtitle: "Box Location Finder",
+                enter_box_id: "ENTER BOX ID",
+                ready_title: "Ready to Search",
+                ready_desc: "Type any Box ID above (e.g. <strong>3001/1/1</strong>) to locate its position.",
+                not_found_title: "Box Not Found",
+                not_found_msg: 'No match found for "{query}".',
+                box_id_found: "BOX ID FOUND",
+                rack: "RACK",
+                shelf: "SHELF",
+                room: "ROOM",
+                level: "LEVEL",
+                settings_title: "Sync & Settings",
+                script_url_label: "Google Apps Script URL / Sheet Link",
+                sync_btn: "Sync Data Now",
+                syncing_btn: "Syncing...",
+                csv_label: "Fallback Manual CSV Upload",
+                boxes_indexed: "{count} boxes indexed",
+                demo_boxes: "{count} demo boxes",
+                demo_mode: "Demo Mode",
+                synced: "Synced: {time}",
+                recent_searches: "RECENT SEARCHES",
+                copy_location: "Copy Location",
+                copied: "Copied!",
+                whatsapp_share: "WhatsApp",
+                clear: "CLEAR"
+            },
+            ms: {
+                title: "CARIAN",
+                subtitle: "Carian Lokasi Kotak",
+                enter_box_id: "MASUKKAN ID KOTAK",
+                ready_title: "Sedia Untuk Carian",
+                ready_desc: "Taip mana-mana ID Kotak di atas (cth. <strong>3001/1/1</strong>) untuk mencari lokasinya.",
+                not_found_title: "Kotak Tidak Dijumpai",
+                not_found_msg: 'Tiada padanan dijumpai untuk "{query}".',
+                box_id_found: "ID KOTAK DIJUMPAI",
+                rack: "RAK",
+                shelf: "PARA",
+                room: "BILIK",
+                level: "ARAS",
+                settings_title: "Tetapan & Penyegerakan",
+                script_url_label: "Pautan Google Apps Script / Sheet",
+                sync_btn: "Segerakkan Data Sekarang",
+                syncing_btn: "Menyegerakkan...",
+                csv_label: "Muat Naik Fail CSV Manual",
+                boxes_indexed: "{count} kotak diindeks",
+                demo_boxes: "{count} kotak demo",
+                demo_mode: "Mod Demo",
+                synced: "Disegerakkan: {time}",
+                recent_searches: "CARIAN TERAKHIR",
+                copy_location: "Salin Lokasi",
+                copied: "Disalin!",
+                whatsapp_share: "WhatsApp",
+                clear: "PADAM"
+            }
+        };
+
+        const DEMO_BOXES = [
+            { "BOX_ID": "3001/1/1", "ROOM": "IJPN 5", "LEVEL": "LEVEL 4", "RACK": "382", "SHELF": "4", "_SHEET_TAB": "Demo Data" },
+            { "BOX_ID": "3001/1/2", "ROOM": "IJPN 5", "LEVEL": "LEVEL 4", "RACK": "382", "SHELF": "4", "_SHEET_TAB": "Demo Data" },
+            { "BOX_ID": "3001/1/3", "ROOM": "IJPN 5", "LEVEL": "LEVEL 4", "RACK": "382", "SHELF": "4", "_SHEET_TAB": "Demo Data" },
+            { "BOX_ID": "3001/1/4", "ROOM": "IJPN 5", "LEVEL": "LEVEL 4", "RACK": "382", "SHELF": "4", "_SHEET_TAB": "Demo Data" }
+        ];
+
+        const searchInput = document.getElementById('search-input');
+        const clearBtn = document.getElementById('clear-btn');
+        const autocompleteList = document.getElementById('autocomplete-list');
+        const historyContainer = document.getElementById('history-container');
+        const historyPills = document.getElementById('history-pills');
+        const historyClearBtn = document.getElementById('history-clear-btn');
+
+        const stateInitial = document.getElementById('state-initial');
+        const stateNotFound = document.getElementById('state-not-found');
+        const stateFound = document.getElementById('state-found');
+        const recordsCountLabel = document.getElementById('records-count-label');
+        const lastSyncTime = document.getElementById('last-sync-time');
+        const notFoundMsg = document.getElementById('not-found-msg');
+        const notFoundDiag = document.getElementById('not-found-diag');
+
+        const resBoxId = document.getElementById('res-box-id');
+        const resSheetTab = document.getElementById('res-sheet-tab');
+        const resRoom = document.getElementById('res-room');
+        const resLevel = document.getElementById('res-level');
+        const resRack = document.getElementById('res-rack');
+        const resShelf = document.getElementById('res-shelf');
+
+        const copyBtn = document.getElementById('copy-btn');
+        const toastNotification = document.getElementById('toast-notification');
+
+        const settingsModal = document.getElementById('settings-modal');
+        const openSettingsBtn = document.getElementById('open-settings-btn');
+        const closeSettingsBtn = document.getElementById('close-settings-btn');
+        const sheetUrlInput = document.getElementById('sheet-url-input');
+        const saveSyncBtn = document.getElementById('save-sync-btn');
+        const csvFileInput = document.getElementById('csv-file-input');
+        const syncStatusDot = document.getElementById('sync-status-dot');
+        const syncErrorBanner = document.getElementById('sync-error-banner');
+
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const themeIconSun = document.getElementById('theme-icon-sun');
+        const themeIconMoon = document.getElementById('theme-icon-moon');
+
+        const langToggleBtn = document.getElementById('lang-toggle-btn');
+        const langFlagIcon = document.getElementById('lang-flag-icon');
+
+        const STORAGE_KEY_DATA = 'kotak_inventory_cache';
+        const STORAGE_KEY_URL = 'kotak_script_url';
+        const STORAGE_KEY_TIME = 'kotak_last_sync';
+        const STORAGE_KEY_THEME = 'kotak_theme_mode';
+        const STORAGE_KEY_LANG = 'kotak_lang_mode';
+        const STORAGE_KEY_HISTORY = 'kotak_search_history';
+
+        let boxData = DEMO_BOXES;
+        let currentLang = 'en';
+        let searchHistory = [];
+        let activeMatch = null;
+
+        function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+        function safeSet(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
+
+        function initLang() {
+            const savedLang = safeGet(STORAGE_KEY_LANG) || 'en';
+            setLang(savedLang);
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            safeSet(STORAGE_KEY_LANG, lang);
+            langFlagIcon.textContent = lang === 'en' ? '🇬🇧' : '🇲🇾';
+            updateUIStrings();
+            if (searchInput.value.trim().length > 0) {
+                performSearch(searchInput.value, false);
+            }
+        }
+
+        langToggleBtn.addEventListener('click', () => {
+            setLang(currentLang === 'en' ? 'ms' : 'en');
+        });
+
+        function updateUIStrings() {
+            const t = TRANSLATIONS[currentLang];
+            const setTxt = (id, val, isHtml = false) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (isHtml) el.innerHTML = val;
+                    else el.textContent = val;
+                }
+            };
+
+            setTxt('i18n-title', t.title);
+            setTxt('i18n-subtitle', t.subtitle);
+            setTxt('i18n-enter-box-id', t.enter_box_id);
+            setTxt('i18n-ready-title', t.ready_title);
+            setTxt('i18n-ready-desc', t.ready_desc, true);
+            setTxt('i18n-not-found-title', t.not_found_title);
+            setTxt('i18n-box-id-found', t.box_id_found);
+            setTxt('i18n-label-rack', t.rack);
+            setTxt('i18n-label-shelf', t.shelf);
+            setTxt('i18n-label-room', t.room);
+            setTxt('i18n-label-level', t.level);
+            setTxt('i18n-settings-title', t.settings_title);
+            setTxt('i18n-script-url-label', t.script_url_label);
+            setTxt('i18n-recent-searches', t.recent_searches);
+            setTxt('i18n-copy-location', t.copy_location);
+            setTxt('i18n-csv-label', t.csv_label);
+
+            if (historyClearBtn) historyClearBtn.textContent = t.clear;
+            if (saveSyncBtn) saveSyncBtn.textContent = t.sync_btn;
+
+            const time = safeGet(STORAGE_KEY_TIME);
+            if (boxData === DEMO_BOXES) {
+                recordsCountLabel.textContent = t.demo_boxes.replace('{count}', boxData.length);
+                lastSyncTime.textContent = t.demo_mode;
+            } else {
+                recordsCountLabel.textContent = t.boxes_indexed.replace('{count}', boxData.length);
+                lastSyncTime.textContent = time ? t.synced.replace('{time}', time) : t.demo_mode;
+            }
+        }
+
+        function initTheme() {
+            const savedTheme = safeGet(STORAGE_KEY_THEME) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            setTheme(savedTheme);
+        }
+
+        function setTheme(mode) {
+            document.documentElement.setAttribute('data-theme', mode);
+            safeSet(STORAGE_KEY_THEME, mode);
+            if (mode === 'dark') {
+                themeIconSun.classList.remove('hidden');
+                themeIconMoon.classList.add('hidden');
+            } else {
+                themeIconSun.classList.add('hidden');
+                themeIconMoon.classList.remove('hidden');
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        function loadSearchHistory() {
+            try {
+                const saved = safeGet(STORAGE_KEY_HISTORY);
+                searchHistory = saved ? JSON.parse(saved) : [];
+            } catch(e) {
+                searchHistory = [];
+            }
+            renderHistoryPills();
+        }
+
+        function addToHistory(boxId) {
+            if (!boxId) return;
+            const cleaned = boxId.trim();
+            searchHistory = searchHistory.filter(item => item.toLowerCase() !== cleaned.toLowerCase());
+            searchHistory.unshift(cleaned);
+            if (searchHistory.length > 4) searchHistory = searchHistory.slice(0, 4);
+            safeSet(STORAGE_KEY_HISTORY, JSON.stringify(searchHistory));
+            renderHistoryPills();
+        }
+
+        function renderHistoryPills() {
+            if (!searchHistory || searchHistory.length === 0) {
+                historyContainer.classList.add('hidden');
+                return;
+            }
+            historyContainer.classList.remove('hidden');
+            historyPills.innerHTML = '';
+            searchHistory.forEach(id => {
+                const pill = document.createElement('button');
+                pill.className = 'history-pill';
+                pill.type = 'button';
+                pill.textContent = id;
+                pill.addEventListener('click', () => {
+                    searchInput.value = id;
+                    clearBtn.style.display = 'block';
+                    hideAutocomplete();
+                    performSearch(id, true);
+                });
+                historyPills.appendChild(pill);
+            });
+        }
+
+        historyClearBtn.addEventListener('click', () => {
+            searchHistory = [];
+            safeSet(STORAGE_KEY_HISTORY, JSON.stringify([]));
+            renderHistoryPills();
+        });
+
+        function handleAutocomplete(query) {
+            const rawTarget = query.trim().toLowerCase();
+            if (rawTarget.length < 1) {
+                hideAutocomplete();
+                return;
+            }
+
+            const matches = boxData.filter(item => {
+                const rawBoxId = getFieldValue(item, ['BOX_ID', 'BOX ID', 'BOXID', 'ID', 'BOX_NO', 'BOX NO', 'NO', 'BOX']);
+                return rawBoxId && rawBoxId.toLowerCase().includes(rawTarget);
+            }).slice(0, 4);
+
+            if (matches.length === 0) {
+                hideAutocomplete();
+                return;
+            }
+
+            autocompleteList.innerHTML = '';
+            matches.forEach(match => {
+                const boxId = getFieldValue(match, ['BOX_ID', 'BOX ID', 'BOXID', 'ID']);
+                const rack = getFieldValue(match, ['RACK', 'RAK', 'BAY']) || '-';
+                const shelf = getFieldValue(match, ['SHELF', 'SHELVES', 'PETAK', 'SLOT', 'PARA']) || '-';
+
+                const div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.innerHTML = `
+                    <span>${boxId}</span>
+                    <span class="autocomplete-sub">R:${rack} | S:${shelf}</span>
+                `;
+                div.addEventListener('click', () => {
+                    searchInput.value = boxId;
+                    clearBtn.style.display = 'block';
+                    hideAutocomplete();
+                    performSearch(boxId, true);
+                });
+                autocompleteList.appendChild(div);
+            });
+
+            autocompleteList.classList.remove('hidden');
+        }
+
+        function hideAutocomplete() {
+            autocompleteList.classList.add('hidden');
+            autocompleteList.innerHTML = '';
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !autocompleteList.contains(e.target)) {
+                hideAutocomplete();
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initLang();
+            loadCachedData();
+            loadSearchHistory();
+            
+            const savedUrl = safeGet(STORAGE_KEY_URL);
+            if (savedUrl) {
+                sheetUrlInput.value = savedUrl;
+                fetchFromGoogleSheet(savedUrl, false);
+            }
+
+            setTimeout(() => searchInput.focus(), 300);
+        });
+
+        searchInput.addEventListener('input', () => {
+            const val = searchInput.value;
+            clearBtn.style.display = val.length > 0 ? 'block' : 'none';
+            handleAutocomplete(val);
+            performSearch(val, false);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            clearBtn.style.display = 'none';
+            hideAutocomplete();
+            performSearch('', false);
+            searchInput.focus();
+        });
+
+        openSettingsBtn.addEventListener('click', () => settingsModal.classList.add('open'));
+        closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('open'));
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) settingsModal.classList.remove('open');
+        });
+
+        saveSyncBtn.addEventListener('click', () => {
+            const rawUrl = sheetUrlInput.value.trim();
+            if (!rawUrl) return;
+            safeSet(STORAGE_KEY_URL, rawUrl);
+            fetchFromGoogleSheet(rawUrl, true);
+        });
+
+        csvFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                parseCSVData(event.target.result);
+                settingsModal.classList.remove('open');
+            };
+            reader.readAsText(file);
+        });
+
+        function loadCachedData() {
+            const cached = safeGet(STORAGE_KEY_DATA);
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        boxData = parsed;
+                        updateUIStrings();
+                        updateSyncStatus('success');
+                        return;
+                    }
+                } catch (e) {}
+            }
+            boxData = DEMO_BOXES;
+            updateUIStrings();
+            updateSyncStatus('success');
+        }
+
+        function normalizeKey(str) {
+            return String(str || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
+
+        function getFieldValue(obj, possibleKeys) {
+            if (!obj || typeof obj !== 'object') return '';
+            const keys = Object.keys(obj);
+            for (let pKey of possibleKeys) {
+                if (obj[pKey] !== undefined && obj[pKey] !== null && String(obj[pKey]).trim() !== '') {
+                    return String(obj[pKey]).trim();
+                }
+            }
+            for (let pKey of possibleKeys) {
+                const targetNorm = normalizeKey(pKey);
+                const matchedKey = keys.find(k => normalizeKey(k) === targetNorm);
+                if (matchedKey && obj[matchedKey] !== undefined && obj[matchedKey] !== null) {
+                    return String(obj[matchedKey]).trim();
+                }
+            }
+            return '';
+        }
+
+        function performSearch(query, saveHistory = false) {
+            const rawTarget = query.trim();
+            const targetUpper = rawTarget.toUpperCase();
+            const targetClean = rawTarget.toLowerCase().replace(/\s+/g, '');
+
+            if (!rawTarget) {
+                stateInitial.classList.remove('hidden');
+                stateNotFound.classList.add('hidden');
+                stateFound.classList.add('hidden');
+                activeMatch = null;
+                return;
+            }
+
+            stateInitial.classList.add('hidden');
+
+            const match = boxData.find(item => {
+                const rawBoxId = getFieldValue(item, ['BOX_ID', 'BOX ID', 'BOXID', 'ID', 'BOX_NO', 'BOX NO', 'NO', 'BOX']);
+                if (!rawBoxId) return false;
+                return rawBoxId.toUpperCase() === targetUpper || rawBoxId.toLowerCase().replace(/\s+/g, '') === targetClean;
+            });
+
+            if (match) {
+                activeMatch = match;
+                stateNotFound.classList.add('hidden');
+                stateFound.classList.remove('hidden');
+
+                const foundBoxId = getFieldValue(match, ['BOX_ID', 'BOX ID', 'BOXID', 'ID']) || rawTarget;
+                resBoxId.textContent = foundBoxId;
+                resRack.textContent = getFieldValue(match, ['RACK', 'RAK', 'BAY']) || '-';
+                resShelf.textContent = getFieldValue(match, ['SHELF', 'SHELVES', 'PETAK', 'SLOT', 'PARA']) || '-';
+                resRoom.textContent = getFieldValue(match, ['ROOM', 'BILIK', 'LOCATION']) || '-';
+                resLevel.textContent = getFieldValue(match, ['LEVEL', 'TINGKAT', 'FLOOR', 'ARAS']) || '-';
+                resSheetTab.textContent = match['_SHEET_TAB'] || 'Main Sheet';
+
+                if (saveHistory) {
+                    addToHistory(foundBoxId);
+                }
+            } else {
+                activeMatch = null;
+                stateFound.classList.add('hidden');
+                stateNotFound.classList.remove('hidden');
+                notFoundMsg.textContent = TRANSLATIONS[currentLang].not_found_msg.replace('{query}', rawTarget);
+                
+                if (boxData.length === 0) {
+                    notFoundDiag.textContent = `⚠️ Database empty. Sync Google Apps Script URL in settings.`;
+                    notFoundDiag.classList.remove('hidden');
+                } else {
+                    const sampleHeaders = boxData[0] ? Object.keys(boxData[0]).join(', ') : 'None';
+                    notFoundDiag.textContent = `Indexed: ${boxData.length} boxes | Headers: [${sampleHeaders}]`;
+                    notFoundDiag.classList.remove('hidden');
+                }
+            }
+        }
+
+        function getFormattedShareText() {
+            if (!activeMatch) return '';
+            const boxId = resBoxId.textContent.trim();
+            const rack = resRack.textContent.trim();
+            const shelf = resShelf.textContent.trim();
+            const room = resRoom.textContent.trim();
+            const level = resLevel.textContent.trim();
+
+            return `BOX: ${boxId}\nRACK: ${rack}\nSHELF: ${shelf}\nROOM: ${room}\nLEVEL: ${level}`;
+        }
+
+        function showToast(msg) {
+            toastNotification.textContent = msg;
+            toastNotification.classList.add('show');
+            setTimeout(() => {
+                toastNotification.classList.remove('show');
+            }, 2000);
+        }
+
+        copyBtn.addEventListener('click', () => {
+            const textToCopy = getFormattedShareText();
+            if (!textToCopy) return;
+
+            // Use document.execCommand('copy') for iframe / mobile browser compatibility
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast(TRANSLATIONS[currentLang].copied);
+            } catch (err) {
+                console.error('Failed to copy', err);
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        });
+
+        async function fetchFromGoogleSheet(url, isManual = false) {
+            syncErrorBanner.classList.add('hidden');
+            updateSyncStatus('loading');
+            saveSyncBtn.disabled = true;
+            saveSyncBtn.textContent = TRANSLATIONS[currentLang].syncing_btn;
+
+            let formattedUrl = url;
+            if (url.includes('docs.google.com/spreadsheets/d/')) {
+                const matches = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+                if (matches && matches[1]) {
+                    formattedUrl = `https://docs.google.com/spreadsheets/d/${matches[1]}/gviz/tq?tqx=out:csv`;
+                }
+            }
+
+            try {
+                const response = await fetch(formattedUrl, { cache: 'no-cache' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('text/csv') || formattedUrl.includes('gviz/tq?tqx=out:csv')) {
+                    const csvText = await response.text();
+                    parseCSVData(csvText);
+                } else {
+                    const data = await response.json();
+                    if (Array.isArray(data)) processReceivedData(data);
+                    else throw new Error('Invalid JSON format');
+                }
+
+                const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                safeSet(STORAGE_KEY_TIME, now);
+                updateUIStrings();
+                updateSyncStatus('success');
+                if (isManual) settingsModal.classList.remove('open');
+            } catch (err) {
+                updateSyncStatus('error');
+                syncErrorBanner.innerHTML = `⚠️ Sync Error: ${err.message}<br>Check Google Apps Script permissions ("Who has access: Anyone").`;
+                syncErrorBanner.classList.remove('hidden');
+            } finally {
+                saveSyncBtn.disabled = false;
+                saveSyncBtn.textContent = TRANSLATIONS[currentLang].sync_btn;
+            }
+        }
+
+        function processReceivedData(data) {
+            boxData = data;
+            safeSet(STORAGE_KEY_DATA, JSON.stringify(data));
+            updateUIStrings();
+            if (searchInput.value.trim().length > 0) performSearch(searchInput.value, false);
+        }
+
+        function parseCSVData(csvText) {
+            const lines = csvText.split(/\r\n|\n/);
+            if (lines.length < 2) return;
+            const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+            const parsed = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const values = lines[i].split(',').map(v => v.replace(/^"|"$/g, '').trim());
+                const row = {};
+                headers.forEach((h, idx) => { row[h] = values[idx] || ''; });
+                parsed.push(row);
+            }
+            processReceivedData(parsed);
+        }
+
+        function updateSyncStatus(type) {
+            syncStatusDot.className = 'status-dot';
+            if (type === 'success') syncStatusDot.classList.add('online');
+            else if (type === 'error') syncStatusDot.classList.add('error');
+        }
+    </script>
+</body>
+</html>
