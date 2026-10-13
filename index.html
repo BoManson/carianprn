@@ -4,14 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CARIAN - Box Location Finder</title>
-
-    <!-- Mobile Web App & iOS Home Screen Icon Config -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CARIAN">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0f172a">
-
     <style>
         :root {
             --bg-main: #f1f5f9;
@@ -26,8 +18,6 @@
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
             --accent-green: #10b981;
-            --whatsapp-green: #25d366;
-            --whatsapp-hover: #128c7e;
             --danger-bg: #fef2f2;
             --danger-border: #fecaca;
             --danger-text: #991b1b;
@@ -49,8 +39,6 @@
             --primary: #3b82f6;
             --primary-hover: #60a5fa;
             --accent-green: #34d399;
-            --whatsapp-green: #25d366;
-            --whatsapp-hover: #128c7e;
             --danger-bg: #450a0a;
             --danger-border: #7f1d1d;
             --danger-text: #fca5a5;
@@ -145,14 +133,8 @@
             transition: background 0.2s;
         }
 
-        .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .icon-btn svg {
-            width: 20px;
-            height: 20px;
-        }
+        .icon-btn:hover { background: rgba(255, 255, 255, 0.2); }
+        .icon-btn svg { width: 20px; height: 20px; }
 
         .status-dot {
             width: 8px;
@@ -185,6 +167,7 @@
             padding: 16px;
             box-shadow: var(--shadow);
             transition: background-color 0.2s, border-color 0.2s;
+            position: relative;
         }
 
         .search-label {
@@ -234,31 +217,28 @@
             display: none;
         }
 
-        .clear-btn svg {
-            width: 22px;
-            height: 22px;
-        }
+        .clear-btn svg { width: 22px; height: 22px; }
 
+        /* Autocomplete Suggestions (Max 4) */
         .autocomplete-dropdown {
             position: absolute;
             top: 100%;
             left: 0;
             right: 0;
-            margin-top: 6px;
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            margin-top: 6px;
+            box-shadow: var(--shadow);
             z-index: 40;
-            max-height: 220px;
-            overflow-y: auto;
+            overflow: hidden;
+            display: none;
         }
 
         .autocomplete-item {
-            padding: 10px 16px;
-            font-size: 14px;
+            padding: 12px 16px;
+            font-size: 15px;
             font-weight: 700;
-            color: var(--text-main);
             cursor: pointer;
             display: flex;
             justify-content: space-between;
@@ -266,76 +246,48 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .autocomplete-item:last-child {
-            border-bottom: none;
-        }
-
-        .autocomplete-item:hover, .autocomplete-item.active {
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover, .autocomplete-item:active {
             background-color: var(--bg-input);
             color: var(--primary);
         }
 
-        .autocomplete-sub {
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--text-muted);
+        /* Recent Searches (Max 4) */
+        .recent-section {
+            margin-top: 10px;
         }
 
-        .history-section {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .history-title {
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text-muted);
-        }
-
-        .history-clear-btn {
-            background: none;
-            border: none;
+        .recent-label {
             font-size: 10px;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
             color: var(--text-light);
-            cursor: pointer;
+            margin-bottom: 6px;
         }
 
-        .history-clear-btn:hover {
-            color: var(--danger-text);
-        }
-
-        .history-pills {
+        .recent-pills {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
         }
 
-        .history-pill {
+        .recent-pill {
             background-color: var(--bg-input);
             border: 1px solid var(--border-color);
             color: var(--text-main);
             padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 11px;
+            border-radius: 14px;
+            font-size: 12px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.15s ease;
         }
 
-        .history-pill:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+        .recent-pill:active {
+            transform: scale(0.95);
+            background-color: var(--primary);
+            color: #ffffff;
         }
 
         .meta-info {
@@ -343,10 +295,11 @@
             justify-content: space-between;
             font-size: 11px;
             color: var(--text-muted);
-            margin-top: 8px;
+            margin-top: 10px;
             font-weight: 500;
         }
 
+        /* State Views */
         .state-view {
             text-align: center;
             padding: 32px 16px;
@@ -362,10 +315,7 @@
             justify-content: center;
         }
 
-        .state-icon-box svg {
-            width: 28px;
-            height: 28px;
-        }
+        .state-icon-box svg { width: 28px; height: 28px; }
 
         .state-initial .state-icon-box {
             background-color: rgba(37, 99, 235, 0.1);
@@ -403,6 +353,7 @@
             word-break: break-all;
         }
 
+        /* Result View */
         .found-header {
             background-color: var(--primary);
             color: #ffffff;
@@ -442,6 +393,7 @@
             text-overflow: ellipsis;
         }
 
+        /* 2x2 Coordinates Grid: RACK & PARA on Top */
         .grid-2x2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -476,44 +428,33 @@
         .coord-val.highlight-blue { color: var(--primary); }
         .coord-val.highlight-green { color: var(--accent-green); }
 
-        /* Action Button Styling */
-        .btn-action {
+        /* Action Button */
+        .btn-copy-location {
+            width: 100%;
+            background-color: var(--bg-card);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            font-weight: 800;
+            font-size: 14px;
+            padding: 13px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            width: 100%;
-            padding: 12px;
-            font-size: 13px;
-            font-weight: 800;
-            border-radius: var(--radius-md);
-            border: none;
-            cursor: pointer;
-            transition: transform 0.1s ease, background-color 0.2s ease;
+            transition: all 0.15s ease;
         }
 
-        .btn-action:active {
+        .btn-copy-location:active {
+            background-color: var(--primary);
+            color: #ffffff;
             transform: scale(0.98);
         }
 
-        .btn-action svg {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
+        .btn-copy-location svg { width: 18px; height: 18px; }
 
-        .btn-copy {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            box-shadow: var(--shadow);
-        }
-
-        .btn-copy:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
+        /* Settings Drawer */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -528,10 +469,7 @@
             transition: opacity 0.2s ease;
         }
 
-        .modal-overlay.open {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
 
         .modal-content {
             background-color: var(--bg-card);
@@ -546,9 +484,7 @@
             transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .modal-overlay.open .modal-content {
-            transform: translateY(0);
-        }
+        .modal-overlay.open .modal-content { transform: translateY(0); }
 
         .modal-header {
             display: flex;
@@ -559,10 +495,7 @@
             margin-bottom: 16px;
         }
 
-        .modal-title {
-            font-size: 18px;
-            font-weight: 800;
-        }
+        .modal-title { font-size: 18px; font-weight: 800; }
 
         .close-btn {
             background: none;
@@ -573,10 +506,7 @@
         }
 
         .close-btn svg { width: 24px; height: 24px; }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
+        .form-group { margin-bottom: 16px; }
 
         .form-label {
             display: block;
@@ -614,36 +544,8 @@
             transition: background 0.2s;
         }
 
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .toast-notification {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background-color: var(--header-bg);
-            color: #ffffff;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: 700;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 100;
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            pointer-events: none;
-        }
-
-        .toast-notification.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .hidden {
-            display: none !important;
-        }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -699,16 +601,13 @@
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                     </svg>
                 </button>
-                <div id="autocomplete-list" class="autocomplete-dropdown hidden"></div>
+                <div id="autocomplete-dropdown" class="autocomplete-dropdown"></div>
             </div>
 
-            <!-- Recent Searches Section -->
-            <div id="history-container" class="history-section hidden">
-                <div class="history-header">
-                    <span id="i18n-recent-searches" class="history-title">RECENT SEARCHES</span>
-                    <button id="history-clear-btn" class="history-clear-btn" type="button">CLEAR</button>
-                </div>
-                <div id="history-pills" class="history-pills"></div>
+            <!-- Recent Searches (Max 4) -->
+            <div id="recent-container" class="recent-section hidden">
+                <div id="i18n-recent-label" class="recent-label">Recent Searches</div>
+                <div id="recent-pills" class="recent-pills"></div>
             </div>
 
             <div class="meta-info">
@@ -751,6 +650,7 @@
                     <div id="res-sheet-tab" class="tab-badge">Sheet</div>
                 </div>
 
+                <!-- Action-First: RACK & SHELF on Top, ROOM & LEVEL Below -->
                 <div class="grid-2x2">
                     <div class="coord-card">
                         <span id="i18n-label-rack" class="coord-label">RACK</span>
@@ -770,17 +670,18 @@
                     </div>
                 </div>
 
-                <!-- One-Tap Copy Location Button -->
-                <button id="copy-btn" class="btn-action btn-copy" type="button">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                <!-- 1-Tap Copy Location Button -->
+                <button id="copy-location-btn" class="btn-copy-location">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
                     </svg>
-                    <span id="i18n-copy-location">Copy Location</span>
+                    <span id="i18n-copy-btn">Copy Location</span>
                 </button>
             </div>
         </div>
     </main>
 
+    <!-- Settings Modal -->
     <div id="settings-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -813,15 +714,14 @@
         </div>
     </div>
 
-    <!-- Toast Notification Banner -->
-    <div id="toast-notification" class="toast-notification">Location copied!</div>
-
     <script>
+        // Terminology: ROOM=BILIK, LEVEL=ARAS, RACK=RAK, SHELF=PARA
         const TRANSLATIONS = {
             en: {
                 title: "CARIAN",
                 subtitle: "Box Location Finder",
                 enter_box_id: "ENTER BOX ID",
+                recent_label: "Recent Searches",
                 ready_title: "Ready to Search",
                 ready_desc: "Type any Box ID above (e.g. <strong>3001/1/1</strong>) to locate its position.",
                 not_found_title: "Box Not Found",
@@ -831,6 +731,8 @@
                 shelf: "SHELF",
                 room: "ROOM",
                 level: "LEVEL",
+                copy_btn: "Copy Location",
+                copied_btn: "✓ Copied to Clipboard!",
                 settings_title: "Sync & Settings",
                 script_url_label: "Google Apps Script URL / Sheet Link",
                 sync_btn: "Sync Data Now",
@@ -839,17 +741,13 @@
                 boxes_indexed: "{count} boxes indexed",
                 demo_boxes: "{count} demo boxes",
                 demo_mode: "Demo Mode",
-                synced: "Synced: {time}",
-                recent_searches: "RECENT SEARCHES",
-                copy_location: "Copy Location",
-                copied: "Copied!",
-                whatsapp_share: "WhatsApp",
-                clear: "CLEAR"
+                synced: "Synced: {time}"
             },
             ms: {
                 title: "CARIAN",
                 subtitle: "Carian Lokasi Kotak",
                 enter_box_id: "MASUKKAN ID KOTAK",
+                recent_label: "Carian Terkini",
                 ready_title: "Sedia Untuk Carian",
                 ready_desc: "Taip mana-mana ID Kotak di atas (cth. <strong>3001/1/1</strong>) untuk mencari lokasinya.",
                 not_found_title: "Kotak Tidak Dijumpai",
@@ -859,6 +757,8 @@
                 shelf: "PARA",
                 room: "BILIK",
                 level: "ARAS",
+                copy_btn: "Salin Lokasi",
+                copied_btn: "✓ Lokasi Disalin!",
                 settings_title: "Tetapan & Penyegerakan",
                 script_url_label: "Pautan Google Apps Script / Sheet",
                 sync_btn: "Segerakkan Data Sekarang",
@@ -867,12 +767,7 @@
                 boxes_indexed: "{count} kotak diindeks",
                 demo_boxes: "{count} kotak demo",
                 demo_mode: "Mod Demo",
-                synced: "Disegerakkan: {time}",
-                recent_searches: "CARIAN TERAKHIR",
-                copy_location: "Salin Lokasi",
-                copied: "Disalin!",
-                whatsapp_share: "WhatsApp",
-                clear: "PADAM"
+                synced: "Disegerakkan: {time}"
             }
         };
 
@@ -883,12 +778,77 @@
             { "BOX_ID": "3001/1/4", "ROOM": "IJPN 5", "LEVEL": "LEVEL 4", "RACK": "382", "SHELF": "4", "_SHEET_TAB": "Demo Data" }
         ];
 
+        // IndexedDB Storage Layer (Solves the iOS 5MB Quota Exceeded Bug Permanently)
+        const DB_NAME = 'CarianAppDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'inventory_store';
+
+        function openDatabase() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function saveBoxesToIDB(data) {
+            try {
+                const db = await openDatabase();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(STORE_NAME, 'readwrite');
+                    const store = tx.objectStore(STORE_NAME);
+                    store.put(data, 'cached_boxes');
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch (err) {
+                console.error("IndexedDB Save Failed", err);
+            }
+        }
+
+        async function loadBoxesFromIDB() {
+            try {
+                const db = await openDatabase();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(STORE_NAME, 'readonly');
+                    const store = tx.objectStore(STORE_NAME);
+                    const req = store.get('cached_boxes');
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => reject(req.error);
+                });
+            } catch (err) {
+                console.error("IndexedDB Load Failed", err);
+                return null;
+            }
+        }
+
+        // Lightweight Storage for Tiny Preferences (< 1 KB)
+        const STORAGE_KEY_URL = 'kotak_script_url';
+        const STORAGE_KEY_TIME = 'kotak_last_sync';
+        const STORAGE_KEY_THEME = 'kotak_theme_mode';
+        const STORAGE_KEY_LANG = 'kotak_lang_mode';
+        const STORAGE_KEY_RECENTS = 'kotak_recent_searches';
+
+        function safeGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
+        function safeSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
+
+        // DOM Helper Guard
+        function setTxt(id, txt) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = txt;
+        }
+
         const searchInput = document.getElementById('search-input');
         const clearBtn = document.getElementById('clear-btn');
-        const autocompleteList = document.getElementById('autocomplete-list');
-        const historyContainer = document.getElementById('history-container');
-        const historyPills = document.getElementById('history-pills');
-        const historyClearBtn = document.getElementById('history-clear-btn');
+        const autocompleteDropdown = document.getElementById('autocomplete-dropdown');
+        const recentContainer = document.getElementById('recent-container');
+        const recentPills = document.getElementById('recent-pills');
 
         const stateInitial = document.getElementById('state-initial');
         const stateNotFound = document.getElementById('state-not-found');
@@ -900,13 +860,11 @@
 
         const resBoxId = document.getElementById('res-box-id');
         const resSheetTab = document.getElementById('res-sheet-tab');
-        const resRoom = document.getElementById('res-room');
-        const resLevel = document.getElementById('res-level');
         const resRack = document.getElementById('res-rack');
         const resShelf = document.getElementById('res-shelf');
-
-        const copyBtn = document.getElementById('copy-btn');
-        const toastNotification = document.getElementById('toast-notification');
+        const resRoom = document.getElementById('res-room');
+        const resLevel = document.getElementById('res-level');
+        const copyLocationBtn = document.getElementById('copy-location-btn');
 
         const settingsModal = document.getElementById('settings-modal');
         const openSettingsBtn = document.getElementById('open-settings-btn');
@@ -920,34 +878,24 @@
         const themeToggleBtn = document.getElementById('theme-toggle-btn');
         const themeIconSun = document.getElementById('theme-icon-sun');
         const themeIconMoon = document.getElementById('theme-icon-moon');
-
         const langToggleBtn = document.getElementById('lang-toggle-btn');
         const langFlagIcon = document.getElementById('lang-flag-icon');
 
-        const STORAGE_KEY_DATA = 'kotak_inventory_cache';
-        const STORAGE_KEY_URL = 'kotak_script_url';
-        const STORAGE_KEY_TIME = 'kotak_last_sync';
-        const STORAGE_KEY_THEME = 'kotak_theme_mode';
-        const STORAGE_KEY_LANG = 'kotak_lang_mode';
-        const STORAGE_KEY_HISTORY = 'kotak_search_history';
-
         let boxData = DEMO_BOXES;
         let currentLang = 'en';
-        let searchHistory = [];
-        let activeMatch = null;
+        let recentSearches = [];
+        let currentMatchedBox = null;
 
-        function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
-        function safeSet(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
-
+        // Language & Theme Management
         function initLang() {
-            const savedLang = safeGet(STORAGE_KEY_LANG) || 'en';
-            setLang(savedLang);
+            currentLang = safeGet(STORAGE_KEY_LANG) || 'en';
+            setLang(currentLang);
         }
 
         function setLang(lang) {
             currentLang = lang;
             safeSet(STORAGE_KEY_LANG, lang);
-            langFlagIcon.textContent = lang === 'en' ? '🇬🇧' : '🇲🇾';
+            if (langFlagIcon) langFlagIcon.textContent = lang === 'en' ? '🇬🇧' : '🇲🇾';
             updateUIStrings();
             if (searchInput.value.trim().length > 0) {
                 performSearch(searchInput.value, false);
@@ -960,41 +908,32 @@
 
         function updateUIStrings() {
             const t = TRANSLATIONS[currentLang];
-            const setTxt = (id, val, isHtml = false) => {
-                const el = document.getElementById(id);
-                if (el) {
-                    if (isHtml) el.innerHTML = val;
-                    else el.textContent = val;
-                }
-            };
-
             setTxt('i18n-title', t.title);
             setTxt('i18n-subtitle', t.subtitle);
             setTxt('i18n-enter-box-id', t.enter_box_id);
+            setTxt('i18n-recent-label', t.recent_label);
             setTxt('i18n-ready-title', t.ready_title);
-            setTxt('i18n-ready-desc', t.ready_desc, true);
+            const rDesc = document.getElementById('i18n-ready-desc');
+            if (rDesc) rDesc.innerHTML = t.ready_desc;
             setTxt('i18n-not-found-title', t.not_found_title);
             setTxt('i18n-box-id-found', t.box_id_found);
             setTxt('i18n-label-rack', t.rack);
             setTxt('i18n-label-shelf', t.shelf);
             setTxt('i18n-label-room', t.room);
             setTxt('i18n-label-level', t.level);
+            setTxt('i18n-copy-btn', t.copy_btn);
             setTxt('i18n-settings-title', t.settings_title);
             setTxt('i18n-script-url-label', t.script_url_label);
-            setTxt('i18n-recent-searches', t.recent_searches);
-            setTxt('i18n-copy-location', t.copy_location);
-            setTxt('i18n-csv-label', t.csv_label);
-
-            if (historyClearBtn) historyClearBtn.textContent = t.clear;
             if (saveSyncBtn) saveSyncBtn.textContent = t.sync_btn;
+            setTxt('i18n-csv-label', t.csv_label);
 
             const time = safeGet(STORAGE_KEY_TIME);
             if (boxData === DEMO_BOXES) {
-                recordsCountLabel.textContent = t.demo_boxes.replace('{count}', boxData.length);
-                lastSyncTime.textContent = t.demo_mode;
+                setTxt('records-count-label', t.demo_boxes.replace('{count}', boxData.length));
+                setTxt('last-sync-time', t.demo_mode);
             } else {
-                recordsCountLabel.textContent = t.boxes_indexed.replace('{count}', boxData.length);
-                lastSyncTime.textContent = time ? t.synced.replace('{time}', time) : t.demo_mode;
+                setTxt('records-count-label', t.boxes_indexed.replace('{count}', boxData.length));
+                setTxt('last-sync-time', time ? t.synced.replace('{time}', time) : t.demo_mode);
             }
         }
 
@@ -1020,121 +959,74 @@
             setTheme(current === 'dark' ? 'light' : 'dark');
         });
 
-        function loadSearchHistory() {
-            try {
-                const saved = safeGet(STORAGE_KEY_HISTORY);
-                searchHistory = saved ? JSON.parse(saved) : [];
-            } catch(e) {
-                searchHistory = [];
-            }
-            renderHistoryPills();
-        }
-
-        function addToHistory(boxId) {
-            if (!boxId) return;
-            const cleaned = boxId.trim();
-            searchHistory = searchHistory.filter(item => item.toLowerCase() !== cleaned.toLowerCase());
-            searchHistory.unshift(cleaned);
-            if (searchHistory.length > 4) searchHistory = searchHistory.slice(0, 4);
-            safeSet(STORAGE_KEY_HISTORY, JSON.stringify(searchHistory));
-            renderHistoryPills();
-        }
-
-        function renderHistoryPills() {
-            if (!searchHistory || searchHistory.length === 0) {
-                historyContainer.classList.add('hidden');
-                return;
-            }
-            historyContainer.classList.remove('hidden');
-            historyPills.innerHTML = '';
-            searchHistory.forEach(id => {
-                const pill = document.createElement('button');
-                pill.className = 'history-pill';
-                pill.type = 'button';
-                pill.textContent = id;
-                pill.addEventListener('click', () => {
-                    searchInput.value = id;
-                    clearBtn.style.display = 'block';
-                    hideAutocomplete();
-                    performSearch(id, true);
-                });
-                historyPills.appendChild(pill);
-            });
-        }
-
-        historyClearBtn.addEventListener('click', () => {
-            searchHistory = [];
-            safeSet(STORAGE_KEY_HISTORY, JSON.stringify([]));
-            renderHistoryPills();
-        });
-
-        function handleAutocomplete(query) {
-            const rawTarget = query.trim().toLowerCase();
-            if (rawTarget.length < 1) {
-                hideAutocomplete();
-                return;
-            }
-
-            const matches = boxData.filter(item => {
-                const rawBoxId = getFieldValue(item, ['BOX_ID', 'BOX ID', 'BOXID', 'ID', 'BOX_NO', 'BOX NO', 'NO', 'BOX']);
-                return rawBoxId && rawBoxId.toLowerCase().includes(rawTarget);
-            }).slice(0, 4);
-
-            if (matches.length === 0) {
-                hideAutocomplete();
-                return;
-            }
-
-            autocompleteList.innerHTML = '';
-            matches.forEach(match => {
-                const boxId = getFieldValue(match, ['BOX_ID', 'BOX ID', 'BOXID', 'ID']);
-                const rack = getFieldValue(match, ['RACK', 'RAK', 'BAY']) || '-';
-                const shelf = getFieldValue(match, ['SHELF', 'SHELVES', 'PETAK', 'SLOT', 'PARA']) || '-';
-
-                const div = document.createElement('div');
-                div.className = 'autocomplete-item';
-                div.innerHTML = `
-                    <span>${boxId}</span>
-                    <span class="autocomplete-sub">R:${rack} | S:${shelf}</span>
-                `;
-                div.addEventListener('click', () => {
-                    searchInput.value = boxId;
-                    clearBtn.style.display = 'block';
-                    hideAutocomplete();
-                    performSearch(boxId, true);
-                });
-                autocompleteList.appendChild(div);
-            });
-
-            autocompleteList.classList.remove('hidden');
-        }
-
-        function hideAutocomplete() {
-            autocompleteList.classList.add('hidden');
-            autocompleteList.innerHTML = '';
-        }
-
-        document.addEventListener('click', (e) => {
-            if (!searchInput.contains(e.target) && !autocompleteList.contains(e.target)) {
-                hideAutocomplete();
-            }
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
+        // App Initialization
+        window.addEventListener('DOMContentLoaded', async () => {
             initTheme();
             initLang();
-            loadCachedData();
-            loadSearchHistory();
-            
+            loadRecents();
+            await loadCachedDataFromStorage();
+
             const savedUrl = safeGet(STORAGE_KEY_URL);
             if (savedUrl) {
                 sheetUrlInput.value = savedUrl;
                 fetchFromGoogleSheet(savedUrl, false);
             }
-
             setTimeout(() => searchInput.focus(), 300);
         });
 
+        async function loadCachedDataFromStorage() {
+            const idbData = await loadBoxesFromIDB();
+            if (Array.isArray(idbData) && idbData.length > 0) {
+                boxData = idbData;
+                updateUIStrings();
+                updateSyncStatus('success');
+                return;
+            }
+            boxData = DEMO_BOXES;
+            updateUIStrings();
+            updateSyncStatus('success');
+        }
+
+        // Recent Searches (Max 4)
+        function loadRecents() {
+            try {
+                const saved = safeGet(STORAGE_KEY_RECENTS);
+                recentSearches = saved ? JSON.parse(saved) : [];
+            } catch (e) { recentSearches = []; }
+            renderRecentPills();
+        }
+
+        function addRecentSearch(boxId) {
+            if (!boxId) return;
+            recentSearches = recentSearches.filter(id => id.toUpperCase() !== boxId.toUpperCase());
+            recentSearches.unshift(boxId.toUpperCase());
+            if (recentSearches.length > 4) recentSearches = recentSearches.slice(0, 4);
+            safeSet(STORAGE_KEY_RECENTS, JSON.stringify(recentSearches));
+            renderRecentPills();
+        }
+
+        function renderRecentPills() {
+            recentPills.innerHTML = '';
+            if (recentSearches.length === 0) {
+                recentContainer.classList.add('hidden');
+                return;
+            }
+            recentContainer.classList.remove('hidden');
+            recentSearches.forEach(id => {
+                const pill = document.createElement('div');
+                pill.className = 'recent-pill';
+                pill.textContent = id;
+                pill.addEventListener('click', () => {
+                    searchInput.value = id;
+                    clearBtn.style.display = 'block';
+                    closeAutocomplete();
+                    performSearch(id, true);
+                });
+                recentPills.appendChild(pill);
+            });
+        }
+
+        // Search & Autocomplete
         searchInput.addEventListener('input', () => {
             const val = searchInput.value;
             clearBtn.style.display = val.length > 0 ? 'block' : 'none';
@@ -1145,51 +1037,52 @@
         clearBtn.addEventListener('click', () => {
             searchInput.value = '';
             clearBtn.style.display = 'none';
-            hideAutocomplete();
+            closeAutocomplete();
             performSearch('', false);
             searchInput.focus();
         });
 
-        openSettingsBtn.addEventListener('click', () => settingsModal.classList.add('open'));
-        closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('open'));
-        settingsModal.addEventListener('click', (e) => {
-            if (e.target === settingsModal) settingsModal.classList.remove('open');
-        });
+        function closeAutocomplete() {
+            autocompleteDropdown.style.display = 'none';
+            autocompleteDropdown.innerHTML = '';
+        }
 
-        saveSyncBtn.addEventListener('click', () => {
-            const rawUrl = sheetUrlInput.value.trim();
-            if (!rawUrl) return;
-            safeSet(STORAGE_KEY_URL, rawUrl);
-            fetchFromGoogleSheet(rawUrl, true);
-        });
-
-        csvFileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                parseCSVData(event.target.result);
-                settingsModal.classList.remove('open');
-            };
-            reader.readAsText(file);
-        });
-
-        function loadCachedData() {
-            const cached = safeGet(STORAGE_KEY_DATA);
-            if (cached) {
-                try {
-                    const parsed = JSON.parse(cached);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        boxData = parsed;
-                        updateUIStrings();
-                        updateSyncStatus('success');
-                        return;
-                    }
-                } catch (e) {}
+        function handleAutocomplete(query) {
+            const rawTarget = query.trim().toUpperCase();
+            if (rawTarget.length < 2) {
+                closeAutocomplete();
+                return;
             }
-            boxData = DEMO_BOXES;
-            updateUIStrings();
-            updateSyncStatus('success');
+
+            const matches = [];
+            for (let item of boxData) {
+                const boxId = getFieldValue(item, ['BOX_ID', 'BOX ID', 'BOXID', 'ID', 'BOX_NO']);
+                if (boxId && boxId.toUpperCase().includes(rawTarget)) {
+                    if (!matches.some(m => m.toUpperCase() === boxId.toUpperCase())) {
+                        matches.push(boxId);
+                    }
+                }
+                if (matches.length >= 4) break; // Limit 4
+            }
+
+            if (matches.length === 0 || (matches.length === 1 && matches[0].toUpperCase() === rawTarget)) {
+                closeAutocomplete();
+                return;
+            }
+
+            autocompleteDropdown.innerHTML = '';
+            matches.forEach(id => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.innerHTML = `<span>${id}</span><span style="font-size: 11px; color: var(--text-muted);">Tap to select</span>`;
+                item.addEventListener('click', () => {
+                    searchInput.value = id;
+                    closeAutocomplete();
+                    performSearch(id, true);
+                });
+                autocompleteDropdown.appendChild(item);
+            });
+            autocompleteDropdown.style.display = 'block';
         }
 
         function normalizeKey(str) {
@@ -1214,7 +1107,7 @@
             return '';
         }
 
-        function performSearch(query, saveHistory = false) {
+        function performSearch(query, isExactSelect = false) {
             const rawTarget = query.trim();
             const targetUpper = rawTarget.toUpperCase();
             const targetClean = rawTarget.toLowerCase().replace(/\s+/g, '');
@@ -1223,7 +1116,7 @@
                 stateInitial.classList.remove('hidden');
                 stateNotFound.classList.add('hidden');
                 stateFound.classList.add('hidden');
-                activeMatch = null;
+                currentMatchedBox = null;
                 return;
             }
 
@@ -1236,27 +1129,25 @@
             });
 
             if (match) {
-                activeMatch = match;
+                currentMatchedBox = match;
                 stateNotFound.classList.add('hidden');
                 stateFound.classList.remove('hidden');
 
                 const foundBoxId = getFieldValue(match, ['BOX_ID', 'BOX ID', 'BOXID', 'ID']) || rawTarget;
                 resBoxId.textContent = foundBoxId;
                 resRack.textContent = getFieldValue(match, ['RACK', 'RAK', 'BAY']) || '-';
-                resShelf.textContent = getFieldValue(match, ['SHELF', 'SHELVES', 'PETAK', 'SLOT', 'PARA']) || '-';
+                resShelf.textContent = getFieldValue(match, ['SHELF', 'PARA', 'SHELVES', 'PETAK', 'SLOT']) || '-';
                 resRoom.textContent = getFieldValue(match, ['ROOM', 'BILIK', 'LOCATION']) || '-';
-                resLevel.textContent = getFieldValue(match, ['LEVEL', 'TINGKAT', 'FLOOR', 'ARAS']) || '-';
+                resLevel.textContent = getFieldValue(match, ['LEVEL', 'ARAS', 'TINGKAT', 'FLOOR']) || '-';
                 resSheetTab.textContent = match['_SHEET_TAB'] || 'Main Sheet';
 
-                if (saveHistory) {
-                    addToHistory(foundBoxId);
-                }
+                if (isExactSelect) addRecentSearch(foundBoxId);
             } else {
-                activeMatch = null;
+                currentMatchedBox = null;
                 stateFound.classList.add('hidden');
                 stateNotFound.classList.remove('hidden');
                 notFoundMsg.textContent = TRANSLATIONS[currentLang].not_found_msg.replace('{query}', rawTarget);
-                
+
                 if (boxData.length === 0) {
                     notFoundDiag.textContent = `⚠️ Database empty. Sync Google Apps Script URL in settings.`;
                     notFoundDiag.classList.remove('hidden');
@@ -1268,45 +1159,51 @@
             }
         }
 
-        function getFormattedShareText() {
-            if (!activeMatch) return '';
-            const boxId = resBoxId.textContent.trim();
-            const rack = resRack.textContent.trim();
-            const shelf = resShelf.textContent.trim();
-            const room = resRoom.textContent.trim();
-            const level = resLevel.textContent.trim();
+        // Copy Location Action
+        copyLocationBtn.addEventListener('click', () => {
+            if (!currentMatchedBox) return;
 
-            return `BOX: ${boxId}\nRACK: ${rack}\nSHELF: ${shelf}\nROOM: ${room}\nLEVEL: ${level}`;
-        }
+            const box = getFieldValue(currentMatchedBox, ['BOX_ID', 'BOX ID', 'BOXID', 'ID']) || '-';
+            const rack = getFieldValue(currentMatchedBox, ['RACK', 'RAK', 'BAY']) || '-';
+            const shelf = getFieldValue(currentMatchedBox, ['SHELF', 'PARA', 'SHELVES', 'PETAK']) || '-';
+            const room = getFieldValue(currentMatchedBox, ['ROOM', 'BILIK', 'LOCATION']) || '-';
+            const level = getFieldValue(currentMatchedBox, ['LEVEL', 'ARAS', 'TINGKAT']) || '-';
 
-        function showToast(msg) {
-            toastNotification.textContent = msg;
-            toastNotification.classList.add('show');
-            setTimeout(() => {
-                toastNotification.classList.remove('show');
-            }, 2000);
-        }
+            const formattedText = `BOX: ${box}\nRACK: ${rack}\nSHELF: ${shelf}\nROOM: ${room}\nLEVEL: ${level}`;
 
-        copyBtn.addEventListener('click', () => {
-            const textToCopy = getFormattedShareText();
-            if (!textToCopy) return;
+            navigator.clipboard.writeText(formattedText).then(() => {
+                const btnSpan = document.getElementById('i18n-copy-btn');
+                const originalText = TRANSLATIONS[currentLang].copy_btn;
+                btnSpan.textContent = TRANSLATIONS[currentLang].copied_btn;
+                setTimeout(() => { btnSpan.textContent = originalText; }, 2000);
+            }).catch(() => {
+                alert("Failed to copy. Please allow clipboard permissions.");
+            });
+        });
 
-            // Use document.execCommand('copy') for iframe / mobile browser compatibility
-            const textarea = document.createElement('textarea');
-            textarea.value = textToCopy;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                document.execCommand('copy');
-                showToast(TRANSLATIONS[currentLang].copied);
-            } catch (err) {
-                console.error('Failed to copy', err);
-            } finally {
-                document.body.removeChild(textarea);
-            }
+        // Settings & Cloud Sync Engine
+        openSettingsBtn.addEventListener('click', () => settingsModal.classList.add('open'));
+        closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('open'));
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) settingsModal.classList.remove('open');
+        });
+
+        saveSyncBtn.addEventListener('click', () => {
+            const rawUrl = sheetUrlInput.value.trim();
+            if (!rawUrl) return;
+            safeSet(STORAGE_KEY_URL, rawUrl);
+            fetchFromGoogleSheet(rawUrl, true);
+        });
+
+        csvFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                parseCSVData(event.target.result);
+                settingsModal.classList.remove('open');
+            };
+            reader.readAsText(file);
         });
 
         async function fetchFromGoogleSheet(url, isManual = false) {
@@ -1333,7 +1230,7 @@
                     parseCSVData(csvText);
                 } else {
                     const data = await response.json();
-                    if (Array.isArray(data)) processReceivedData(data);
+                    if (Array.isArray(data)) await processReceivedData(data);
                     else throw new Error('Invalid JSON format');
                 }
 
@@ -1352,9 +1249,9 @@
             }
         }
 
-        function processReceivedData(data) {
+        async function processReceivedData(data) {
             boxData = data;
-            safeSet(STORAGE_KEY_DATA, JSON.stringify(data));
+            await saveBoxesToIDB(data); // Persistent IndexedDB storage
             updateUIStrings();
             if (searchInput.value.trim().length > 0) performSearch(searchInput.value, false);
         }
