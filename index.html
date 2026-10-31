@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.json">
 <title>CARIAN - Box Location Finder</title>
 <style>
 :root{--bg-main:#f1f5f9;--bg-card:#fff;--bg-input:#f8fafc;--text-main:#0f172a;--text-muted:#64748b;--text-light:#94a3b8;--border-color:#e2e8f0;--header-bg:#0f172a;--primary:#2563eb;--primary-hover:#1d4ed8;--accent-green:#10b981;--danger-bg:#fef2f2;--danger-border:#fecaca;--danger-text:#991b1b;--shadow:0 4px 6px -1px rgba(0,0,0,.05),0 2px 4px -2px rgba(0,0,0,.05);--radius-lg:16px;--radius-md:12px}
 [data-theme="dark"]{--bg-main:#0f172a;--bg-card:#1e293b;--bg-input:#334155;--text-main:#f8fafc;--text-muted:#94a3b8;--text-light:#64748b;--border-color:#334155;--header-bg:#020617;--primary:#3b82f6;--primary-hover:#60a5fa;--accent-green:#34d399;--danger-bg:#450a0a;--danger-border:#7f1d1d;--danger-text:#fca5a5;--shadow:0 4px 6px -1px rgba(0,0,0,.3)}
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg-main);color:var(--text-main);min-height:100vh;display:flex;flex-direction:column;transition:background-color .2s,color .2s}
+body{background:var(--bg-main);color:var(--text-main);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;transition:background-color .2s,color .2s}
 header{background:var(--header-bg);color:#fff;position:sticky;top:0;z-index:30;box-shadow:var(--shadow);padding:12px 16px}
 .header-container{max-width:480px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
 .brand-box{display:flex;align-items:center;gap:10px}
@@ -79,13 +81,20 @@ main{max-width:480px;width:100%;margin:0 auto;padding:16px;display:flex;flex-dir
 .btn-primary:hover{background:var(--primary-hover)}
 .btn-primary:disabled{opacity:.6;cursor:wait}
 .hidden{display:none!important}
+.warn-box{background:rgba(245,158,11,.12);border:1px solid #f59e0b;border-radius:var(--radius-md);padding:12px;margin-bottom:12px;font-size:13px}
+.warn-box strong{display:block;margin-bottom:6px}
+.warn-box div div{margin-top:3px;font-size:12px;color:var(--text-muted)}
+:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.lang-opt{opacity:.5;font-size:13px;font-weight:700}
+.lang-opt.on{opacity:1;text-decoration:underline}
+.lang-sep{margin:0 4px;opacity:.4}
 </style>
 </head>
 <body>
 <header><div class="header-container">
   <div class="brand-box"><div class="brand-logo">C</div><div class="brand-text"><h1 id="i18n-title">CARIAN</h1><p id="i18n-subtitle">Box Location Finder</p></div></div>
   <div class="header-actions">
-    <button id="lang-toggle-btn" class="icon-btn" title="Toggle Language"><span id="lang-flag-icon">🇬🇧</span></button>
+    <button id="lang-toggle-btn" class="icon-btn"><span id="lang-en" class="lang-opt">EN</span><span class="lang-sep">|</span><span id="lang-ms" class="lang-opt">BM</span></button>
     <button id="theme-toggle-btn" class="icon-btn" title="Toggle Theme">
       <svg id="theme-icon-sun" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="hidden"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
       <svg id="theme-icon-moon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
@@ -111,7 +120,7 @@ main{max-width:480px;width:100%;margin:0 auto;padding:16px;display:flex;flex-dir
     <div class="meta-info"><span id="records-count-label"></span><span id="last-sync-time"></span></div>
   </div>
 
-  <div id="result-container">
+  <div id="result-container" aria-live="polite">
     <div id="state-nodata" class="card state-view state-nodata hidden">
       <div class="state-icon-box"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 3.6 3 8 3s8-1 8-3V7M4 7c0 2 3.6 3 8 3s8-1 8-3M4 7c0-2 3.6-3 8-3s8 1 8 3M4 12c0 2 3.6 3 8 3s8-1 8-3"/></svg></div>
       <div id="i18n-nodata-title" class="state-title">No data loaded</div>
@@ -133,6 +142,7 @@ main{max-width:480px;width:100%;margin:0 auto;padding:16px;display:flex;flex-dir
     </div>
 
     <div id="state-found" class="hidden">
+      <div id="dup-warning" class="warn-box hidden"><strong id="dup-title"></strong><div id="dup-list"></div></div>
       <div class="found-header">
         <div><div id="i18n-box-id-found" class="found-label">BOX ID FOUND</div><div id="res-box-id" class="found-id">---</div></div>
         <div id="res-sheet-tab" class="tab-badge">Sheet</div>
@@ -151,7 +161,7 @@ main{max-width:480px;width:100%;margin:0 auto;padding:16px;display:flex;flex-dir
   </div>
 </main>
 
-<div id="settings-modal" class="modal-overlay"><div class="modal-content">
+<div id="settings-modal" class="modal-overlay" role="dialog" aria-modal="true"><div class="modal-content">
   <div class="modal-header">
     <div id="i18n-settings-title" class="modal-title">Sync & Settings</div>
     <button id="close-settings-btn" class="close-btn"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
@@ -185,7 +195,11 @@ const TRANSLATIONS = {
     err_noloc:"Box IDs found, but no rack, shelf, room or level columns. Headers received: {headers}",
     err_html:"Received a web page instead of data. Check that access is set to \"Anyone\".", err_json:"Unrecognised JSON format. Expected a list of rows.",
     err_timeout:"The request timed out.", err_shrink:"The new data has far fewer rows ({new}) than the saved data ({old}). Kept the saved data.",
-    confirm_shrink:"The new data has {new} rows, but the saved data has {old}. Replace it anyway?", cancelled:"Cancelled."
+    confirm_shrink:"The new data has {new} rows, but the saved data has {old}. Replace it anyway?", cancelled:"Cancelled.",
+    lang_btn:"Language", theme_btn:"Light / dark mode", settings_btn:"Settings", clear_btn:"Clear search", close_btn:"Close",
+    dup_title:"This Box ID appears {n} times. Check which one is correct.", main_sheet:"Main Sheet",
+    err_http:"The server returned an error (HTTP {code}). Check the link and the access setting.", err_file:"The file could not be read.",
+    diag:"Indexed: {n} boxes | Headers: [{headers}]"
   },
   ms: {
     title:"CARIAN", subtitle:"Carian Lokasi Kotak", enter_box_id:"MASUKKAN ID KOTAK", recent_label:"Carian Terkini",
@@ -194,7 +208,7 @@ const TRANSLATIONS = {
     rack:"RAK", shelf:"PARA", room:"BILIK", level:"ARAS", copy_btn:"Salin Lokasi", copied_btn:"✓ Lokasi Disalin!",
     settings_title:"Tetapan & Penyegerakan", script_url_label:"Pautan Google Apps Script / Sheet", sync_btn:"Segerakkan Data Sekarang",
     syncing_btn:"Menyegerakkan...", csv_label:"Muat Naik Fail CSV Manual", boxes_indexed:"{count} kotak diindeks",
-    synced:"Disegerakkan: {time}", synced_unknown:"Tarikh sinkronisasi tidak diketahui", no_data:"Tiada data",
+    synced:"Disegerakkan: {time}", synced_unknown:"Tarikh penyegerakan tidak diketahui", no_data:"Tiada data",
     nodata_title:"Tiada data dimuatkan", nodata_desc:"Segerakkan Google Sheet anda atau muat naik CSV dalam Tetapan. Lokasi kotak tidak dipaparkan sehingga data sebenar dimuatkan.",
     open_settings:"Buka Tetapan", cached_warn:"Penyegerakan gagal. Memaparkan data tersimpan dari {date}.", skipped:"{n} baris tanpa ID Kotak dilangkau.",
     not_saved:"Data dimuatkan, tetapi tidak dapat disimpan untuk kegunaan luar talian.", copy_fail:"Gagal menyalin. Sila benarkan kebenaran papan keratan.",
@@ -202,17 +216,23 @@ const TRANSLATIONS = {
     err_noloc:"ID Kotak dijumpai, tetapi tiada lajur rak, para, bilik atau aras. Pengepala diterima: {headers}",
     err_html:"Menerima halaman web dan bukannya data. Semak akses ditetapkan kepada \"Anyone\".", err_json:"Format JSON tidak dikenali. Senarai baris dijangka.",
     err_timeout:"Permintaan tamat masa.", err_shrink:"Data baharu mempunyai jauh lebih sedikit baris ({new}) berbanding data tersimpan ({old}). Data tersimpan dikekalkan.",
-    confirm_shrink:"Data baharu mempunyai {new} baris, tetapi data tersimpan mempunyai {old}. Ganti juga?", cancelled:"Dibatalkan."
+    confirm_shrink:"Data baharu mempunyai {new} baris, tetapi data tersimpan mempunyai {old}. Ganti juga?", cancelled:"Dibatalkan.",
+    lang_btn:"Bahasa", theme_btn:"Mod cerah / gelap", settings_btn:"Tetapan", clear_btn:"Kosongkan carian", close_btn:"Tutup",
+    dup_title:"ID Kotak ini muncul {n} kali. Semak yang mana betul.", main_sheet:"Helaian Utama",
+    err_http:"Pelayan memulangkan ralat (HTTP {code}). Semak pautan dan tetapan akses.", err_file:"Fail tidak dapat dibaca.",
+    diag:"Diindeks: {n} kotak | Pengepala: [{headers}]"
   }
 };
 
-// Column aliases, defined once and used for search, display, copy and validation
+// The Google Sheet headers. Defined once here and used for search, display, copy and validation.
+// The sheet always uses these English names; the Malay words (RAK, PARA, BILIK, ARAS) are only
+// the labels shown on screen (see TRANSLATIONS above), so they never need to be searched for.
 const COLS = {
-  id:['BOX_ID','BOX ID','BOXID','BOX_NO','BOX NO','ID'],
-  rack:['RACK','RAK','BAY'],
-  shelf:['SHELF','PARA','SHELVES','PETAK','SLOT'],
-  room:['ROOM','BILIK','LOCATION'],
-  level:['LEVEL','ARAS','TINGKAT','FLOOR']
+  id:['BOX_ID'],
+  rack:['RACK'],
+  shelf:['SHELF'],
+  room:['ROOM'],
+  level:['LEVEL']
 };
 
 const DB_NAME='CarianAppDB', STORE='inventory_store';
@@ -250,6 +270,7 @@ const safeSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const $=id=>document.getElementById(id);
 const setTxt=(id,t)=>{const e=$(id); if(e) e.textContent=t;};
 const T=()=>TRANSLATIONS[currentLang];
+const lab=(id,txt)=>{const e=$(id); if(e){e.title=txt; e.setAttribute("aria-label",txt);}};   // spoken name for icon buttons
 const fill=(s,o)=>s.replace(/\{(\w+)\}/g,(m,k)=>o[k]!==undefined?o[k]:m);
 
 const searchInput=$('search-input'), clearBtn=$('clear-btn'), dropdown=$('autocomplete-dropdown');
@@ -274,7 +295,7 @@ const fmtDate=iso=>{ const d=new Date(iso); return isNaN(d)?'':d.toLocaleString(
 function setLang(lang){
   currentLang=lang; safeSet(K_LANG,lang);
   document.documentElement.lang=lang;
-  $('lang-flag-icon').textContent=lang==='en'?'🇬🇧':'🇲🇾';
+  $('lang-en').classList.toggle('on',lang==='en'); $('lang-ms').classList.toggle('on',lang==='ms');
   updateUIStrings();
   if(searchInput.value.trim()) performSearch(searchInput.value,false);
 }
@@ -290,6 +311,7 @@ function updateUIStrings(){
   setTxt('i18n-copy-btn',t.copy_btn); setTxt('i18n-settings-title',t.settings_title); setTxt('i18n-script-url-label',t.script_url_label);
   setTxt('i18n-csv-label',t.csv_label); setTxt('i18n-nodata-title',t.nodata_title); setTxt('i18n-nodata-desc',t.nodata_desc);
   setTxt('i18n-open-settings',t.open_settings);
+  lab('lang-toggle-btn',t.lang_btn); lab('theme-toggle-btn',t.theme_btn); lab('open-settings-btn',t.settings_btn); lab('clear-btn',t.clear_btn); lab('close-settings-btn',t.close_btn);
   if(!saveSyncBtn.disabled) saveSyncBtn.textContent=t.sync_btn;
   if(!boxData.length){
     setTxt('records-count-label',t.no_data); setTxt('last-sync-time','');
@@ -406,7 +428,7 @@ async function syncFromUrl(url,manual){
   const ctl=new AbortController(), timer=setTimeout(()=>ctl.abort(),20000);
   try{
     const res=await fetch(target,{cache:'no-cache',signal:ctl.signal});
-    if(!res.ok) throw new Error('HTTP '+res.status);
+    if(!res.ok) throw new Error(fill(T().err_http,{code:res.status}));
     const rows=parseResponse(await res.text());
     if(seq!==syncSeq) return;
     const notes=await applyRows(rows,'sheet',manual);
@@ -453,7 +475,7 @@ csvFileInput.addEventListener('change',e=>{
     }catch(err){ reportFailure(err); }
     finally{ csvFileInput.value=''; }
   };
-  reader.onerror=()=>{ reportFailure(new Error(reader.error?reader.error.message:'File read error')); csvFileInput.value=''; };
+  reader.onerror=()=>{ reportFailure(new Error(T().err_file)); csvFileInput.value=''; };
   reader.readAsText(file);
 });
 
@@ -467,8 +489,24 @@ async function loadCache(){
 }
 
 // ---------- View ----------
+let byId=new Map(), ids=[], currentMatches=[], suggestionCount=0, typingTimer=null, recentTimer=null;
+const keyOf=x=>String(x).toUpperCase().replace(/\s+/g,'');
+const val=(r,k)=>getFieldValue(r,COLS[k])||'-';
+
+// The index: built once whenever data changes, so each search is a quick lookup instead of reading every box.
+function buildIndex(){
+  byId=new Map();
+  for(const r of boxData){
+    const id=getFieldValue(r,COLS.id); if(!id) continue;
+    const k=keyOf(id), list=byId.get(k);
+    if(list) list.push(r); else byId.set(k,[r]);   // same ID twice = both rows are kept
+  }
+  ids=[...byId.keys()].sort();
+}
+
 function refreshView(){
   const has=boxData.length>0;
+  buildIndex();
   searchInput.disabled=!has;
   searchInput.placeholder=has?'3001/1/1':T().no_data;
   updateUIStrings();
@@ -487,87 +525,123 @@ function addRecentSearch(id){
   renderRecentPills();
 }
 function renderRecentPills(){
-  recentPills.innerHTML='';
+  recentPills.textContent='';
   recentContainer.classList.toggle('hidden',!recentSearches.length);
   recentSearches.forEach(id=>{
-    const pill=document.createElement('div');
-    pill.className='recent-pill'; pill.textContent=id;
-    pill.addEventListener('click',()=>{ searchInput.value=id; clearBtn.style.display='block'; closeAutocomplete(); performSearch(id,true); });
+    const pill=document.createElement('button');
+    pill.type='button'; pill.className='recent-pill'; pill.textContent=id;
+    pill.addEventListener('click',()=>selectId(id));
     recentPills.appendChild(pill);
   });
 }
 
 // ---------- Search & autocomplete ----------
+// Tapping a suggestion or recent: show the result at once and close the phone keyboard.
+function selectId(id){
+  clearTimeout(typingTimer);
+  searchInput.value=id; clearBtn.style.display='block';
+  closeAutocomplete();
+  performSearch(id,true);
+  searchInput.blur();
+}
+
+// Debounce: wait 0.12s after the last key, then search once (not on every letter).
 searchInput.addEventListener('input',()=>{
-  const v=searchInput.value;
-  clearBtn.style.display=v.length?'block':'none';
-  handleAutocomplete(v); performSearch(v,false);
+  clearBtn.style.display=searchInput.value?'block':'none';
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>{
+    suggestionCount=handleAutocomplete(searchInput.value);
+    performSearch(searchInput.value,false,true);
+  },120);
+});
+// Enter / Go on the phone keyboard.
+searchInput.addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  e.preventDefault(); clearTimeout(typingTimer);
+  closeAutocomplete(); performSearch(searchInput.value,true); searchInput.blur();
 });
 clearBtn.addEventListener('click',()=>{
+  clearTimeout(typingTimer);
   searchInput.value=''; clearBtn.style.display='none'; closeAutocomplete(); performSearch('',false); searchInput.focus();
 });
-function closeAutocomplete(){ dropdown.style.display='none'; dropdown.innerHTML=''; }
+document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrapper')) closeAutocomplete(); });
+function closeAutocomplete(){ dropdown.style.display='none'; dropdown.textContent=''; }
 
+// Suggestions: IDs that START with what was typed (max 4). Returns how many were shown.
 function handleAutocomplete(query){
-  const q=query.trim().toUpperCase();
-  if(q.length<2||!boxData.length){ closeAutocomplete(); return; }
-  const matches=[];
-  for(const item of boxData){
-    const id=getFieldValue(item,COLS.id);
-    if(id&&id.toUpperCase().includes(q)&&!matches.some(m=>m.toUpperCase()===id.toUpperCase())) matches.push(id);
-    if(matches.length>=4) break;
-  }
-  if(!matches.length||(matches.length===1&&matches[0].toUpperCase()===q)){ closeAutocomplete(); return; }
-  dropdown.innerHTML='';
-  matches.forEach(id=>{
-    const row=document.createElement('div'); row.className='autocomplete-item';
-    const a=document.createElement('span'); a.textContent=id;           // textContent: sheet data is never parsed as HTML
+  closeAutocomplete();
+  const q=keyOf(query.trim());
+  if(q.length<2||!ids.length) return 0;
+  let lo=0, hi=ids.length;                       // binary search: jump to the first ID >= q
+  while(lo<hi){ const mid=(lo+hi)>>1; if(ids[mid]<q) lo=mid+1; else hi=mid; }
+  const found=[];
+  for(let i=lo;i<ids.length&&found.length<4&&ids[i].startsWith(q);i++) found.push(ids[i]);
+  if(!found.length||(found.length===1&&found[0]===q)) return 0;   // nothing to suggest, or already an exact match
+  found.forEach(k=>{
+    const label=getFieldValue(byId.get(k)[0],COLS.id);
+    const row=document.createElement('div'); row.className='autocomplete-item'; row.setAttribute('role','button');
+    const a=document.createElement('span'); a.textContent=label;      // textContent: sheet data is never read as code
     const b=document.createElement('span'); b.style.cssText='font-size:11px;color:var(--text-muted)'; b.textContent='›';
     row.append(a,b);
-    row.addEventListener('click',()=>{ searchInput.value=id; closeAutocomplete(); performSearch(id,true); });
+    row.addEventListener('click',()=>selectId(label));
     dropdown.appendChild(row);
   });
   dropdown.style.display='block';
+  return found.length;
 }
 
-function performSearch(query,isExactSelect=false){
-  const raw=query.trim(), upper=raw.toUpperCase(), clean=raw.toLowerCase().replace(/\s+/g,'');
-  [stateNoData,stateInitial,stateNotFound,stateFound].forEach(s=>s.classList.add('hidden'));
-  currentMatchedBox=null;
+function showDuplicates(rows){
+  const box=$('dup-warning'), list=$('dup-list');
+  list.textContent='';
+  box.classList.toggle('hidden',rows.length<2);
+  if(rows.length<2) return;
+  const t=T();
+  setTxt('dup-title',fill(t.dup_title,{n:rows.length}));
+  rows.forEach((r,i)=>{
+    const d=document.createElement('div'), tab=r['_SHEET_TAB'];
+    d.textContent=`${i+1}. ${t.rack} ${val(r,'rack')} · ${t.shelf} ${val(r,'shelf')} · ${t.room} ${val(r,'room')} · ${t.level} ${val(r,'level')}`+(tab?` (${tab})`:'');
+    list.appendChild(d);
+  });
+}
 
+function performSearch(query,isExactSelect=false,typing=false){
+  const raw=query.trim(), t=T();
+  clearTimeout(recentTimer);
+  [stateNoData,stateInitial,stateNotFound,stateFound].forEach(x=>x.classList.add('hidden'));
+  currentMatches=[];
   if(!boxData.length){ stateNoData.classList.remove('hidden'); return; }   // never show a location without real data
   if(!raw){ stateInitial.classList.remove('hidden'); return; }
 
-  const match=boxData.find(item=>{
-    const id=getFieldValue(item,COLS.id);
-    return id&&(id.toUpperCase()===upper||id.toLowerCase().replace(/\s+/g,'')===clean);
-  });
-
-  if(match){
-    currentMatchedBox=match;
+  const rows=byId.get(keyOf(raw));
+  if(rows){
+    currentMatches=rows;
+    const first=rows[0], id=getFieldValue(first,COLS.id)||raw;
     stateFound.classList.remove('hidden');
-    const id=getFieldValue(match,COLS.id)||raw;
     $('res-box-id').textContent=id;
-    $('res-rack').textContent=getFieldValue(match,COLS.rack)||'-';
-    $('res-shelf').textContent=getFieldValue(match,COLS.shelf)||'-';
-    $('res-room').textContent=getFieldValue(match,COLS.room)||'-';
-    $('res-level').textContent=getFieldValue(match,COLS.level)||'-';
-    $('res-sheet-tab').textContent=match['_SHEET_TAB']||'Main Sheet';
+    $('res-rack').textContent=val(first,'rack');
+    $('res-shelf').textContent=val(first,'shelf');
+    $('res-room').textContent=val(first,'room');
+    $('res-level').textContent=val(first,'level');
+    $('res-sheet-tab').textContent=first['_SHEET_TAB']||t.main_sheet;
+    showDuplicates(rows);
     if(isExactSelect) addRecentSearch(id);
+    else if(typing) recentTimer=setTimeout(()=>addRecentSearch(id),800);   // typed a full ID and paused: remember it
+  }else if(typing&&(suggestionCount>0||raw.length<2)){
+    stateInitial.classList.remove('hidden');   // still typing: no "not found" yet
   }else{
     stateNotFound.classList.remove('hidden');
-    $('not-found-msg').textContent=fill(T().not_found_msg,{query:raw});
+    $('not-found-msg').textContent=fill(t.not_found_msg,{query:raw});
     const d=$('not-found-diag');
-    d.textContent=`Indexed: ${boxData.length} boxes | Headers: [${Object.keys(boxData[0]).join(', ')}]`;
+    d.textContent=fill(t.diag,{n:boxData.length,headers:Object.keys(boxData[0]).join(', ')});
     d.classList.remove('hidden');
   }
 }
 
 // ---------- Copy ----------
 $('copy-location-btn').addEventListener('click',()=>{
-  const b=currentMatchedBox; if(!b) return;
-  const g=k=>getFieldValue(b,COLS[k])||'-';
-  const text=`BOX: ${g('id')}\nRACK: ${g('rack')}\nSHELF: ${g('shelf')}\nROOM: ${g('room')}\nLEVEL: ${g('level')}`;
+  if(!currentMatches.length) return;
+  const t=T();
+  const text=currentMatches.map(r=>`BOX_ID: ${val(r,'id')}\n${t.rack}: ${val(r,'rack')}\n${t.shelf}: ${val(r,'shelf')}\n${t.room}: ${val(r,'room')}\n${t.level}: ${val(r,'level')}`).join('\n\n');
   const p=navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject(new Error('no clipboard'));
   p.then(()=>{
     const span=$('i18n-copy-btn');
@@ -578,10 +652,12 @@ $('copy-location-btn').addEventListener('click',()=>{
 
 // ---------- Settings modal ----------
 const openSettings=()=>settingsModal.classList.add('open');
+const closeSettings=()=>settingsModal.classList.remove('open');
 $('open-settings-btn').addEventListener('click',openSettings);
 $('nodata-settings-btn').addEventListener('click',openSettings);
-$('close-settings-btn').addEventListener('click',()=>settingsModal.classList.remove('open'));
-settingsModal.addEventListener('click',e=>{ if(e.target===settingsModal) settingsModal.classList.remove('open'); });
+$('close-settings-btn').addEventListener('click',closeSettings);
+settingsModal.addEventListener('click',e=>{ if(e.target===settingsModal) closeSettings(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSettings(); });
 
 // ---------- Init ----------
 window.addEventListener('DOMContentLoaded',async()=>{
@@ -595,6 +671,11 @@ window.addEventListener('DOMContentLoaded',async()=>{
   if(url){ sheetUrlInput.value=url; syncFromUrl(url,false); }
   setTimeout(()=>{ if(!searchInput.disabled) searchInput.focus(); },300);
 });
+
+// Service worker: lets the app open with no signal. Needs https (or localhost) and sw.js saved beside this file.
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
 </script>
 </body>
 </html>
