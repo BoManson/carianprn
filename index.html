@@ -194,12 +194,12 @@ const TRANSLATIONS = {
     err_empty:"The source returned no rows.", err_noid:"No Box ID column found. Headers received: {headers}",
     err_noloc:"Box IDs found, but no rack, shelf, room or level columns. Headers received: {headers}",
     err_html:"Received a web page instead of data. Check that access is set to \"Anyone\".", err_json:"Unrecognised JSON format. Expected a list of rows.",
-    err_timeout:"The request timed out.", err_shrink:"The new data has far fewer rows ({new}) than the saved data ({old}). Kept the saved data.",
+    err_timeout:"No answer after 90 seconds. The Google Apps Script may be slow, or its link or access setting may be wrong.", err_shrink:"The new data has far fewer rows ({new}) than the saved data ({old}). Kept the saved data.",
     confirm_shrink:"The new data has {new} rows, but the saved data has {old}. Replace it anyway?", cancelled:"Cancelled.",
     lang_btn:"Language", theme_btn:"Light / dark mode", settings_btn:"Settings", clear_btn:"Clear search", close_btn:"Close",
     dup_title:"This Box ID appears {n} times. Check which one is correct.", main_sheet:"Main Sheet",
     err_http:"The server returned an error (HTTP {code}). Check the link and the access setting.", err_file:"The file could not be read.",
-    diag:"Indexed: {n} boxes | Headers: [{headers}]"
+    diag:"Indexed: {n} boxes | Headers: [{headers}]", loading:"Loading data... this can take up to a minute."
   },
   ms: {
     title:"CARIAN", subtitle:"Carian Lokasi Kotak", enter_box_id:"MASUKKAN ID KOTAK", recent_label:"Carian Terkini",
@@ -215,12 +215,12 @@ const TRANSLATIONS = {
     err_empty:"Sumber tidak memulangkan sebarang baris.", err_noid:"Lajur ID Kotak tidak dijumpai. Pengepala diterima: {headers}",
     err_noloc:"ID Kotak dijumpai, tetapi tiada lajur rak, para, bilik atau aras. Pengepala diterima: {headers}",
     err_html:"Menerima halaman web dan bukannya data. Semak akses ditetapkan kepada \"Anyone\".", err_json:"Format JSON tidak dikenali. Senarai baris dijangka.",
-    err_timeout:"Permintaan tamat masa.", err_shrink:"Data baharu mempunyai jauh lebih sedikit baris ({new}) berbanding data tersimpan ({old}). Data tersimpan dikekalkan.",
+    err_timeout:"Tiada jawapan selepas 90 saat. Google Apps Script mungkin perlahan, atau pautan atau tetapan aksesnya tidak betul.", err_shrink:"Data baharu mempunyai jauh lebih sedikit baris ({new}) berbanding data tersimpan ({old}). Data tersimpan dikekalkan.",
     confirm_shrink:"Data baharu mempunyai {new} baris, tetapi data tersimpan mempunyai {old}. Ganti juga?", cancelled:"Dibatalkan.",
     lang_btn:"Bahasa", theme_btn:"Mod cerah / gelap", settings_btn:"Tetapan", clear_btn:"Kosongkan carian", close_btn:"Tutup",
     dup_title:"ID Kotak ini muncul {n} kali. Semak yang mana betul.", main_sheet:"Helaian Utama",
     err_http:"Pelayan memulangkan ralat (HTTP {code}). Semak pautan dan tetapan akses.", err_file:"Fail tidak dapat dibaca.",
-    diag:"Diindeks: {n} kotak | Pengepala: [{headers}]"
+    diag:"Diindeks: {n} kotak | Pengepala: [{headers}]", loading:"Memuatkan data... ini mungkin mengambil masa sehingga seminit."
   }
 };
 
@@ -418,14 +418,14 @@ function finishLoad(notes){
 
 async function syncFromUrl(url,manual){
   const seq=++syncSeq, t=T();
-  clearBanners(); setStatus('loading');
+  clearBanners(); setStatus('loading'); setTxt('last-sync-time',t.loading);
   saveSyncBtn.disabled=true; saveSyncBtn.textContent=t.syncing_btn;
   let target=url;
   if(url.includes('docs.google.com/spreadsheets/d/')){
     const m=url.match(/\/d\/([a-zA-Z0-9-_]+)/);
     if(m) target=`https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv`;
   }
-  const ctl=new AbortController(), timer=setTimeout(()=>ctl.abort(),20000);
+  const ctl=new AbortController(), timer=setTimeout(()=>ctl.abort(),90000);
   try{
     const res=await fetch(target,{cache:'no-cache',signal:ctl.signal});
     if(!res.ok) throw new Error(fill(T().err_http,{code:res.status}));
@@ -444,8 +444,8 @@ async function syncFromUrl(url,manual){
 }
 
 function reportFailure(err){
-  if(err.cancelled){ setStatus(boxData.length?'success':'empty'); return; }
-  setStatus('error');
+  if(err.cancelled){ setStatus(boxData.length?'success':'empty'); updateUIStrings(); return; }
+  setStatus('error'); updateUIStrings();
   const t=T();
   let msg=err.message;
   if(boxData.length){
