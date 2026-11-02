@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.json">
+<title>CARIAN - Box Location Finder</title>
+<style>
+:root{--bg-main:#f1f5f9;--bg-card:#fff;--bg-input:#f8fafc;--text-main:#0f172a;--text-muted:#64748b;--text-light:#94a3b8;--border-color:#e2e8f0;--header-bg:#0f172a;--primary:#2563eb;--primary-hover:#1d4ed8;--accent-green:#10b981;--danger-bg:#fef2f2;--danger-border:#fecaca;--danger-text:#991b1b;--shadow:0 4px 6px -1px rgba(0,0,0,.05),0 2px 4px -2px rgba(0,0,0,.05);--radius-lg:16px;--radius-md:12px}
+[data-theme="dark"]{--bg-main:#0f172a;--bg-card:#1e293b;--bg-input:#334155;--text-main:#f8fafc;--text-muted:#94a3b8;--text-light:#64748b;--border-color:#334155;--header-bg:#020617;--primary:#3b82f6;--primary-hover:#60a5fa;--accent-green:#34d399;--danger-bg:#450a0a;--danger-border:#7f1d1d;--danger-text:#fca5a5;--shadow:0 4px 6px -1px rgba(0,0,0,.3)}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg-main);color:var(--text-main);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;transition:background-color .2s,color .2s}
+header{background:var(--header-bg);color:#fff;position:sticky;top:0;z-index:30;box-shadow:var(--shadow);padding:12px 16px}
+.header-container{max-width:480px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.brand-box{display:flex;align-items:center;gap:10px}
+.brand-logo{background:var(--primary);color:#fff;font-weight:900;font-size:20px;width:38px;height:38px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center}
+.brand-text h1{font-size:18px;font-weight:800;letter-spacing:.5px;line-height:1.1}
+.brand-text p{font-size:11px;color:#94a3b8}
+.header-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;padding:6px 10px;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;font-size:16px;height:38px}
+.icon-btn:hover{background:rgba(255,255,255,.2)}
+.icon-btn svg{width:20px;height:20px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#f59e0b;position:absolute;top:6px;right:6px}
+.status-dot.online{background:#10b981}
+.status-dot.error{background:#ef4444}
+main{max-width:480px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px;flex-grow:1}
+.card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow);position:relative}
+.search-label,.form-label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px}
+.search-wrapper{position:relative;display:flex;align-items:center}
+.search-input{width:100%;font-size:24px;font-weight:800;padding:12px 42px 12px 16px;background:var(--bg-input);border:2px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-main);text-transform:uppercase;letter-spacing:.5px;outline:none}
+.search-input:focus{border-color:var(--primary);background:var(--bg-card)}
+.search-input:disabled{opacity:.5;cursor:not-allowed}
+.clear-btn{position:absolute;right:12px;background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;display:none}
+.clear-btn svg{width:22px;height:22px}
+.autocomplete-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);margin-top:6px;box-shadow:var(--shadow);z-index:40;overflow:hidden;display:none}
+.autocomplete-item{padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-color)}
+.autocomplete-item:last-child{border-bottom:none}
+.autocomplete-item:hover,.autocomplete-item:active{background:var(--bg-input);color:var(--primary)}
+.recent-section{margin-top:10px}
+.recent-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-light);margin-bottom:6px}
+.recent-pills{display:flex;flex-wrap:wrap;gap:6px}
+.recent-pill{background:var(--bg-input);border:1px solid var(--border-color);color:var(--text-main);padding:5px 10px;border-radius:14px;font-size:12px;font-weight:700;cursor:pointer}
+.recent-pill:active{transform:scale(.95);background:var(--primary);color:#fff}
+.meta-info{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--text-muted);margin-top:10px;font-weight:500}
+.state-view{text-align:center;padding:32px 16px}
+.state-icon-box{width:56px;height:56px;margin:0 auto 12px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center}
+.state-icon-box svg{width:28px;height:28px}
+.state-initial .state-icon-box{background:rgba(37,99,235,.1);color:var(--primary)}
+.state-not-found .state-icon-box{background:rgba(239,68,68,.1);color:#ef4444}
+.state-nodata .state-icon-box{background:rgba(245,158,11,.15);color:#f59e0b}
+.state-title{font-size:17px;font-weight:700;margin-bottom:4px}
+.state-desc{font-size:12px;color:var(--text-muted);max-width:280px;margin:0 auto}
+.diagnostic-box{margin-top:12px;padding:10px;background:var(--danger-bg);border:1px solid var(--danger-border);border-radius:var(--radius-md);color:var(--danger-text);font-size:11px;text-align:left;font-family:monospace;word-break:break-word}
+#data-banner{margin:0;font-family:inherit;font-size:12px}
+.found-header{background:var(--primary);color:#fff;padding:16px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);margin-bottom:12px}
+.found-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:.8}
+.found-id{font-size:22px;font-weight:900;letter-spacing:.5px}
+.tab-badge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid-2x2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.coord-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)}
+.coord-label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:4px}
+.coord-val{font-size:20px;font-weight:900;word-break:break-all}
+.highlight-blue{color:var(--primary)}
+.highlight-green{color:var(--accent-green)}
+.btn-copy-location{width:100%;background:var(--bg-card);color:var(--primary);border:2px solid var(--primary);font-weight:800;font-size:14px;padding:13px;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-copy-location:active{background:var(--primary);color:#fff;transform:scale(.98)}
+.btn-copy-location svg{width:18px;height:18px}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:50;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal-content{background:var(--bg-card);width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:24px;max-height:85vh;overflow-y:auto;transform:translateY(100%);transition:transform .25s cubic-bezier(.16,1,.3,1)}
+.modal-overlay.open .modal-content{transform:translateY(0)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-color);padding-bottom:12px;margin-bottom:16px}
+.modal-title{font-size:18px;font-weight:800}
+.close-btn{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px}
+.close-btn svg{width:24px;height:24px}
+.form-group{margin-bottom:16px}
+.form-label{margin-bottom:6px}
+.form-textarea{width:100%;padding:10px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-main);font-size:12px;font-family:monospace;resize:vertical;outline:none}
+.btn-primary{width:100%;background:var(--primary);color:#fff;font-weight:800;font-size:14px;padding:12px;border:none;border-radius:var(--radius-md);cursor:pointer}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-primary:disabled{opacity:.6;cursor:wait}
+.hidden{display:none!important}
+.warn-box{background:rgba(245,158,11,.12);border:1px solid #f59e0b;border-radius:var(--radius-md);padding:12px;margin-bottom:12px;font-size:13px}
+.warn-box strong{display:block;margin-bottom:6px}
+.warn-box div div{margin-top:3px;font-size:12px;color:var(--text-muted)}
+:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.lang-opt{opacity:.5;font-size:13px;font-weight:700}
+.lang-opt.on{opacity:1;text-decoration:underline}
+.lang-sep{margin:0 4px;opacity:.4}
+</style>
+</head>
+<body>
+<header><div class="header-container">
+  <div class="brand-box"><div class="brand-logo">C</div><div class="brand-text"><h1 id="i18n-title">CARIAN</h1><p id="i18n-subtitle">Box Location Finder</p></div></div>
+  <div class="header-actions">
+    <button id="lang-toggle-btn" class="icon-btn"><span id="lang-en" class="lang-opt">EN</span><span class="lang-sep">|</span><span id="lang-ms" class="lang-opt">BM</span></button>
+    <button id="theme-toggle-btn" class="icon-btn" title="Toggle Theme">
+      <svg id="theme-icon-sun" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="hidden"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      <svg id="theme-icon-moon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+    </button>
+    <button id="open-settings-btn" class="icon-btn" title="Settings">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      <span id="sync-status-dot" class="status-dot"></span>
+    </button>
+  </div>
+</div></header>
+
+<main>
+  <div id="data-banner" class="diagnostic-box hidden"></div>
+
+  <div class="card">
+    <label for="search-input" id="i18n-enter-box-id" class="search-label">ENTER BOX ID</label>
+    <div class="search-wrapper">
+      <input type="text" id="search-input" placeholder="3001/1/1" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" class="search-input">
+      <button id="clear-btn" class="clear-btn" type="button"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg></button>
+      <div id="autocomplete-dropdown" class="autocomplete-dropdown"></div>
+    </div>
+    <div id="recent-container" class="recent-section hidden"><div id="i18n-recent-label" class="recent-label">Recent Searches</div><div id="recent-pills" class="recent-pills"></div></div>
+    <div class="meta-info"><span id="records-count-label"></span><span id="last-sync-time"></span></div>
+  </div>
+
+  <div id="result-container" aria-live="polite">
+    <div id="state-nodata" class="card state-view state-nodata hidden">
+      <div class="state-icon-box"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 3.6 3 8 3s8-1 8-3V7M4 7c0 2 3.6 3 8 3s8-1 8-3M4 7c0-2 3.6-3 8-3s8 1 8 3M4 12c0 2 3.6 3 8 3s8-1 8-3"/></svg></div>
+      <div id="i18n-nodata-title" class="state-title">No data loaded</div>
+      <div id="i18n-nodata-desc" class="state-desc"></div>
+      <button id="nodata-settings-btn" class="btn-primary" style="margin-top:16px;max-width:240px"><span id="i18n-open-settings">Open Settings</span></button>
+    </div>
+
+    <div id="state-initial" class="card state-view state-initial hidden">
+      <div class="state-icon-box"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></div>
+      <div id="i18n-ready-title" class="state-title">Ready to Search</div>
+      <div id="i18n-ready-desc" class="state-desc"></div>
+    </div>
+
+    <div id="state-not-found" class="card state-view state-not-found hidden">
+      <div class="state-icon-box"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>
+      <div id="i18n-not-found-title" class="state-title" style="color:var(--danger-text)">Box Not Found</div>
+      <div id="not-found-msg" class="state-desc"></div>
+      <div id="not-found-diag" class="diagnostic-box hidden"></div>
+    </div>
+
+    <div id="state-found" class="hidden">
+      <div id="dup-warning" class="warn-box hidden"><strong id="dup-title"></strong><div id="dup-list"></div></div>
+      <div class="found-header">
+        <div><div id="i18n-box-id-found" class="found-label">BOX ID FOUND</div><div id="res-box-id" class="found-id">---</div></div>
+        <div id="res-sheet-tab" class="tab-badge">Sheet</div>
+      </div>
+      <div class="grid-2x2">
+        <div class="coord-card"><span id="i18n-label-rack" class="coord-label">RACK</span><span id="res-rack" class="coord-val highlight-blue">---</span></div>
+        <div class="coord-card"><span id="i18n-label-shelf" class="coord-label">SHELF</span><span id="res-shelf" class="coord-val highlight-green">---</span></div>
+        <div class="coord-card"><span id="i18n-label-room" class="coord-label">ROOM</span><span id="res-room" class="coord-val">---</span></div>
+        <div class="coord-card"><span id="i18n-label-level" class="coord-label">LEVEL</span><span id="res-level" class="coord-val">---</span></div>
+      </div>
+      <button id="copy-location-btn" class="btn-copy-location">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+        <span id="i18n-copy-btn">Copy Location</span>
+      </button>
+    </div>
+  </div>
+</main>
+
+<div id="settings-modal" class="modal-overlay" role="dialog" aria-modal="true"><div class="modal-content">
+  <div class="modal-header">
+    <div id="i18n-settings-title" class="modal-title">Sync & Settings</div>
+    <button id="close-settings-btn" class="close-btn"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+  </div>
+  <div id="sync-error-banner" class="diagnostic-box hidden" style="margin-bottom:16px"></div>
+  <div class="form-group">
+    <label id="i18n-script-url-label" class="form-label">Google Apps Script URL / Sheet Link</label>
+    <textarea id="sheet-url-input" rows="3" placeholder="https://script.google.com/macros/s/.../exec" class="form-textarea"></textarea>
+  </div>
+  <button id="save-sync-btn" class="btn-primary">Sync Data Now</button>
+  <div style="border-top:1px solid var(--border-color);margin-top:20px;padding-top:16px">
+    <label id="i18n-csv-label" class="form-label">Fallback Manual CSV Upload</label>
+    <input type="file" id="csv-file-input" accept=".csv" style="font-size:12px;color:var(--text-muted);width:100%">
+  </div>
+</div></div>
+
+<script>
+const TRANSLATIONS = {
+  en: {
+    title:"CARIAN", subtitle:"Box Location Finder", enter_box_id:"ENTER BOX ID", recent_label:"Recent Searches",
+    ready_title:"Ready to Search", ready_desc:"Type any Box ID above (e.g. <strong>3001/1/1</strong>) to locate its position.",
+    not_found_title:"Box Not Found", not_found_msg:'No match found for "{query}".', box_id_found:"BOX ID FOUND",
+    rack:"RACK", shelf:"SHELF", room:"ROOM", level:"LEVEL", copy_btn:"Copy Location", copied_btn:"✓ Copied to Clipboard!",
+    settings_title:"Sync & Settings", script_url_label:"Google Apps Script URL / Sheet Link", sync_btn:"Sync Data Now",
+    syncing_btn:"Syncing...", csv_label:"Fallback Manual CSV Upload", boxes_indexed:"{count} boxes indexed",
+    synced:"Synced: {time}", synced_unknown:"Sync date unknown", no_data:"No data",
+    nodata_title:"No data loaded", nodata_desc:"Sync your Google Sheet or upload a CSV in Settings. Box locations are not shown until real data is loaded.",
+    open_settings:"Open Settings", cached_warn:"Sync failed. Showing saved data from {date}.", skipped:"{n} rows without a Box ID were skipped.",
+    not_saved:"Data loaded, but it could not be saved for offline use.", copy_fail:"Failed to copy. Please allow clipboard permissions.",
+    err_empty:"The source returned no rows.", err_noid:"No Box ID column found. Headers received: {headers}",
+    err_noloc:"Box IDs found, but no rack, shelf, room or level columns. Headers received: {headers}",
+    err_html:"Received a web page instead of data. Check that access is set to \"Anyone\".", err_json:"Unrecognised JSON format. Expected a list of rows.",
+    err_timeout:"No answer after 90 seconds. The Google Apps Script may be slow, or its link or access setting may be wrong.", err_shrink:"The new data has far fewer rows ({new}) than the saved data ({old}). Kept the saved data.",
+    confirm_shrink:"The new data has {new} rows, but the saved data has {old}. Replace it anyway?", cancelled:"Cancelled.",
+    lang_btn:"Language", theme_btn:"Light / dark mode", settings_btn:"Settings", clear_btn:"Clear search", close_btn:"Close",
+    dup_title:"This Box ID appears {n} times. Check which one is correct.", main_sheet:"Main Sheet",
+    err_http:"The server returned an error (HTTP {code}). Check the link and the access setting.", err_file:"The file could not be read.",
+    diag:"Indexed: {n} boxes | Headers: [{headers}]", loading:"Loading data... this can take up to a minute."
+  },
+  ms: {
+    title:"CARIAN", subtitle:"Carian Lokasi Kotak", enter_box_id:"MASUKKAN ID KOTAK", recent_label:"Carian Terkini",
+    ready_title:"Sedia Untuk Carian", ready_desc:"Taip mana-mana ID Kotak di atas (cth. <strong>3001/1/1</strong>) untuk mencari lokasinya.",
+    not_found_title:"Kotak Tidak Dijumpai", not_found_msg:'Tiada padanan dijumpai untuk "{query}".', box_id_found:"ID KOTAK DIJUMPAI",
+    rack:"RAK", shelf:"PARA", room:"BILIK", level:"ARAS", copy_btn:"Salin Lokasi", copied_btn:"✓ Lokasi Disalin!",
+    settings_title:"Tetapan & Penyegerakan", script_url_label:"Pautan Google Apps Script / Sheet", sync_btn:"Segerakkan Data Sekarang",
+    syncing_btn:"Menyegerakkan...", csv_label:"Muat Naik Fail CSV Manual", boxes_indexed:"{count} kotak diindeks",
+    synced:"Disegerakkan: {time}", synced_unknown:"Tarikh penyegerakan tidak diketahui", no_data:"Tiada data",
+    nodata_title:"Tiada data dimuatkan", nodata_desc:"Segerakkan Google Sheet anda atau muat naik CSV dalam Tetapan. Lokasi kotak tidak dipaparkan sehingga data sebenar dimuatkan.",
+    open_settings:"Buka Tetapan", cached_warn:"Penyegerakan gagal. Memaparkan data tersimpan dari {date}.", skipped:"{n} baris tanpa ID Kotak dilangkau.",
+    not_saved:"Data dimuatkan, tetapi tidak dapat disimpan untuk kegunaan luar talian.", copy_fail:"Gagal menyalin. Sila benarkan kebenaran papan keratan.",
+    err_empty:"Sumber tidak memulangkan sebarang baris.", err_noid:"Lajur ID Kotak tidak dijumpai. Pengepala diterima: {headers}",
+    err_noloc:"ID Kotak dijumpai, tetapi tiada lajur rak, para, bilik atau aras. Pengepala diterima: {headers}",
+    err_html:"Menerima halaman web dan bukannya data. Semak akses ditetapkan kepada \"Anyone\".", err_json:"Format JSON tidak dikenali. Senarai baris dijangka.",
+    err_timeout:"Tiada jawapan selepas 90 saat. Google Apps Script mungkin perlahan, atau pautan atau tetapan aksesnya tidak betul.", err_shrink:"Data baharu mempunyai jauh lebih sedikit baris ({new}) berbanding data tersimpan ({old}). Data tersimpan dikekalkan.",
+    confirm_shrink:"Data baharu mempunyai {new} baris, tetapi data tersimpan mempunyai {old}. Ganti juga?", cancelled:"Dibatalkan.",
+    lang_btn:"Bahasa", theme_btn:"Mod cerah / gelap", settings_btn:"Tetapan", clear_btn:"Kosongkan carian", close_btn:"Tutup",
+    dup_title:"ID Kotak ini muncul {n} kali. Semak yang mana betul.", main_sheet:"Helaian Utama",
+    err_http:"Pelayan memulangkan ralat (HTTP {code}). Semak pautan dan tetapan akses.", err_file:"Fail tidak dapat dibaca.",
+    diag:"Diindeks: {n} kotak | Pengepala: [{headers}]", loading:"Memuatkan data... ini mungkin mengambil masa sehingga seminit."
+  }
+};
+
+// The Google Sheet headers. Defined once here and used for search, display, copy and validation.
+// The sheet always uses these English names; the Malay words (RAK, PARA, BILIK, ARAS) are only
+// the labels shown on screen (see TRANSLATIONS above), so they never need to be searched for.
+const COLS = {
+  id:['BOX_ID'],
+  rack:['RACK'],
+  shelf:['SHELF'],
+  room:['ROOM'],
+  level:['LEVEL']
+};
+
+const DB_NAME='CarianAppDB', STORE='inventory_store';
+let dbp=null;
+function openDB(){
+  return dbp || (dbp = new Promise((res,rej)=>{
+    const r=indexedDB.open(DB_NAME,1);
+    r.onupgradeneeded=()=>{ if(!r.result.objectStoreNames.contains(STORE)) r.result.createObjectStore(STORE); };
+    r.onsuccess=()=>res(r.result);
+    r.onerror=()=>{ dbp=null; rej(r.error); };
+  }));
+}
+async function idbPut(value){            // throws on failure
+  const db=await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).put(value,'cached_boxes');
+    tx.oncomplete=()=>res();
+    tx.onerror=tx.onabort=()=>rej(tx.error||new Error('IndexedDB write failed'));
+  });
+}
+async function idbGet(){                 // null on failure
+  try{
+    const db=await openDB();
+    return await new Promise((res,rej)=>{
+      const q=db.transaction(STORE,'readonly').objectStore(STORE).get('cached_boxes');
+      q.onsuccess=()=>res(q.result||null); q.onerror=()=>rej(q.error);
+    });
+  }catch(e){ console.error('IndexedDB load failed',e); return null; }
+}
+
+const K_URL='kotak_script_url', K_THEME='kotak_theme_mode', K_LANG='kotak_lang_mode', K_RECENTS='kotak_recent_searches';
+const safeGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const safeSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const $=id=>document.getElementById(id);
+const setTxt=(id,t)=>{const e=$(id); if(e) e.textContent=t;};
+const T=()=>TRANSLATIONS[currentLang];
+const lab=(id,txt)=>{const e=$(id); if(e){e.title=txt; e.setAttribute("aria-label",txt);}};   // spoken name for icon buttons
+const fill=(s,o)=>s.replace(/\{(\w+)\}/g,(m,k)=>o[k]!==undefined?o[k]:m);
+
+const searchInput=$('search-input'), clearBtn=$('clear-btn'), dropdown=$('autocomplete-dropdown');
+const recentContainer=$('recent-container'), recentPills=$('recent-pills');
+const stateNoData=$('state-nodata'), stateInitial=$('state-initial'), stateNotFound=$('state-not-found'), stateFound=$('state-found');
+const settingsModal=$('settings-modal'), sheetUrlInput=$('sheet-url-input'), saveSyncBtn=$('save-sync-btn'), csvFileInput=$('csv-file-input');
+const dot=$('sync-status-dot'), modalBanner=$('sync-error-banner'), mainBanner=$('data-banner');
+
+// No demo data: an empty array means "nothing loaded", and the UI says so.
+let boxData=[], meta=null, currentLang='en', recentSearches=[], currentMatchedBox=null, syncSeq=0, lastWarning='';
+
+// ---------- Status & banners ----------
+function setStatus(type){ dot.className='status-dot'+(type==='success'?' online':type==='error'?' error':''); }
+function showBanner(msg, modalToo=true){
+  mainBanner.textContent=msg; mainBanner.classList.remove('hidden');
+  if(modalToo){ modalBanner.textContent='⚠️ '+msg; modalBanner.classList.remove('hidden'); }
+}
+function clearBanners(){ mainBanner.classList.add('hidden'); modalBanner.classList.add('hidden'); mainBanner.textContent=modalBanner.textContent=''; }
+const fmtDate=iso=>{ const d=new Date(iso); return isNaN(d)?'':d.toLocaleString([],{dateStyle:'medium',timeStyle:'short'}); };
+
+// ---------- Language & theme ----------
+function setLang(lang){
+  currentLang=lang; safeSet(K_LANG,lang);
+  document.documentElement.lang=lang;
+  $('lang-en').classList.toggle('on',lang==='en'); $('lang-ms').classList.toggle('on',lang==='ms');
+  updateUIStrings();
+  if(searchInput.value.trim()) performSearch(searchInput.value,false);
+}
+$('lang-toggle-btn').addEventListener('click',()=>setLang(currentLang==='en'?'ms':'en'));
+
+function updateUIStrings(){
+  const t=T();
+  setTxt('i18n-title',t.title); setTxt('i18n-subtitle',t.subtitle); setTxt('i18n-enter-box-id',t.enter_box_id);
+  setTxt('i18n-recent-label',t.recent_label); setTxt('i18n-ready-title',t.ready_title);
+  $('i18n-ready-desc').innerHTML=t.ready_desc;
+  setTxt('i18n-not-found-title',t.not_found_title); setTxt('i18n-box-id-found',t.box_id_found);
+  setTxt('i18n-label-rack',t.rack); setTxt('i18n-label-shelf',t.shelf); setTxt('i18n-label-room',t.room); setTxt('i18n-label-level',t.level);
+  setTxt('i18n-copy-btn',t.copy_btn); setTxt('i18n-settings-title',t.settings_title); setTxt('i18n-script-url-label',t.script_url_label);
+  setTxt('i18n-csv-label',t.csv_label); setTxt('i18n-nodata-title',t.nodata_title); setTxt('i18n-nodata-desc',t.nodata_desc);
+  setTxt('i18n-open-settings',t.open_settings);
+  lab('lang-toggle-btn',t.lang_btn); lab('theme-toggle-btn',t.theme_btn); lab('open-settings-btn',t.settings_btn); lab('clear-btn',t.clear_btn); lab('close-settings-btn',t.close_btn);
+  if(!saveSyncBtn.disabled) saveSyncBtn.textContent=t.sync_btn;
+  if(!boxData.length){
+    setTxt('records-count-label',t.no_data); setTxt('last-sync-time','');
+  }else{
+    setTxt('records-count-label',fill(t.boxes_indexed,{count:boxData.length}));
+    const d=meta&&meta.syncedAt?fmtDate(meta.syncedAt):'';
+    setTxt('last-sync-time',d?fill(t.synced,{time:d}):t.synced_unknown);
+  }
+}
+
+function setTheme(mode){
+  document.documentElement.setAttribute('data-theme',mode); safeSet(K_THEME,mode);
+  $('theme-icon-sun').classList.toggle('hidden',mode!=='dark');
+  $('theme-icon-moon').classList.toggle('hidden',mode==='dark');
+}
+$('theme-toggle-btn').addEventListener('click',()=>setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+// ---------- Data access ----------
+const normalizeKey=s=>String(s||'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');
+function getFieldValue(obj,keys){
+  if(!obj||typeof obj!=='object') return '';
+  for(const k of keys){ const v=obj[k]; if(v!==undefined&&v!==null&&String(v).trim()!=='') return String(v).trim(); }
+  const own=Object.keys(obj);
+  for(const k of keys){
+    const m=own.find(o=>normalizeKey(o)===normalizeKey(k));
+    if(m&&obj[m]!==undefined&&obj[m]!==null&&String(obj[m]).trim()!=='') return String(obj[m]).trim();
+  }
+  return '';
+}
+
+// ---------- Parsing & validation ----------
+function parseCSV(text){                 // RFC 4180: quoted fields, commas, newlines, "" escapes
+  text=text.replace(/^\uFEFF/,'');
+  const rows=[]; let row=[], f='', q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c==='"') q=true;
+    else if(c===','){ row.push(f); f=''; }
+    else if(c==='\n'||c==='\r'){ if(c==='\r'&&text[i+1]==='\n') i++; row.push(f); f=''; rows.push(row); row=[]; }
+    else f+=c;
+  }
+  if(f!==''||row.length){ row.push(f); rows.push(row); }
+  const data=rows.filter(r=>r.some(v=>v.trim()));
+  if(data.length<2) return [];
+  const headers=data[0].map(h=>h.trim());
+  return data.slice(1).map(r=>{ const o={}; headers.forEach((h,i)=>{ if(h) o[h]=(r[i]||'').trim(); }); return o; });
+}
+
+function parseResponse(text){
+  const s=text.trim();
+  if(s[0]==='<') throw new Error(T().err_html);
+  if(s[0]==='['||s[0]==='{'){
+    const d=JSON.parse(s);
+    if(Array.isArray(d)) return d;
+    if(d&&d.error) throw new Error(String(d.error));
+    const a=d&&(d.data||d.rows);
+    if(Array.isArray(a)) return a;
+    throw new Error(T().err_json);
+  }
+  return parseCSV(s);
+}
+
+// Returns clean rows or throws. Never replaces good data with bad data.
+function validateRows(rows){
+  const t=T();
+  if(!Array.isArray(rows)||!rows.length) throw new Error(t.err_empty);
+  const objs=rows.filter(r=>r&&typeof r==='object'&&!Array.isArray(r));
+  if(!objs.length) throw new Error(t.err_json);
+  const headers=Object.keys(objs[0]).join(', ')||'-';
+  const valid=objs.filter(r=>getFieldValue(r,COLS.id));
+  if(!valid.length) throw new Error(fill(t.err_noid,{headers}));
+  const hasLoc=valid.some(r=>['rack','shelf','room','level'].some(k=>getFieldValue(r,COLS[k])));
+  if(!hasLoc) throw new Error(fill(t.err_noloc,{headers}));
+  return {valid, skipped:rows.length-valid.length};
+}
+
+// Validate, guard against suspicious shrinkage, then save, and only then swap in the new data.
+async function applyRows(rows,source,manual){
+  const t=T();
+  const {valid,skipped}=validateRows(rows);
+  const old=boxData.length;
+  if(old>=20 && valid.length<old*0.5){
+    if(!manual) throw new Error(fill(t.err_shrink,{new:valid.length,old}));
+    if(!confirm(fill(t.confirm_shrink,{new:valid.length,old}))){ const e=new Error(t.cancelled); e.cancelled=true; throw e; }
+  }
+  const newMeta={syncedAt:new Date().toISOString(),source};
+  let saved=true;
+  try{ await idbPut({rows:valid,...newMeta}); }catch(e){ console.error(e); saved=false; }
+  boxData=valid; meta=newMeta;
+  const notes=[];
+  if(skipped>0) notes.push(fill(t.skipped,{n:skipped}));
+  if(!saved) notes.push(t.not_saved);
+  return notes;
+}
+
+// ---------- Sync ----------
+function finishLoad(notes){
+  setStatus('success');
+  clearBanners();
+  if(notes.length) showBanner(notes.join(' '),false);
+  refreshView();
+}
+
+async function syncFromUrl(url,manual){
+  const seq=++syncSeq, t=T();
+  clearBanners(); setStatus('loading'); setTxt('last-sync-time',t.loading);
+  saveSyncBtn.disabled=true; saveSyncBtn.textContent=t.syncing_btn;
+  let target=url;
+  if(url.includes('docs.google.com/spreadsheets/d/')){
+    const m=url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    if(m) target=`https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv`;
+  }
+  const ctl=new AbortController(), timer=setTimeout(()=>ctl.abort(),90000);
+  try{
+    const res=await fetch(target,{cache:'no-cache',signal:ctl.signal});
+    if(!res.ok) throw new Error(fill(T().err_http,{code:res.status}));
+    const rows=parseResponse(await res.text());
+    if(seq!==syncSeq) return;
+    const notes=await applyRows(rows,'sheet',manual);
+    finishLoad(notes);
+    if(manual) settingsModal.classList.remove('open');
+  }catch(err){
+    if(seq!==syncSeq) return;
+    reportFailure(err.name==='AbortError'?new Error(T().err_timeout):err);
+  }finally{
+    clearTimeout(timer);
+    if(seq===syncSeq){ saveSyncBtn.disabled=false; saveSyncBtn.textContent=T().sync_btn; }
+  }
+}
+
+function reportFailure(err){
+  if(err.cancelled){ setStatus(boxData.length?'success':'empty'); updateUIStrings(); return; }
+  setStatus('error'); updateUIStrings();
+  const t=T();
+  let msg=err.message;
+  if(boxData.length){
+    const d=meta&&meta.syncedAt?fmtDate(meta.syncedAt):t.synced_unknown;
+    msg=fill(t.cached_warn,{date:d})+' '+msg;
+  }
+  showBanner(msg);
+}
+
+saveSyncBtn.addEventListener('click',()=>{
+  const url=sheetUrlInput.value.trim();
+  if(!url) return;
+  safeSet(K_URL,url);
+  syncFromUrl(url,true);
+});
+
+csvFileInput.addEventListener('change',e=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    clearBanners();
+    try{
+      const notes=await applyRows(parseCSV(String(ev.target.result)),'csv',true);
+      finishLoad(notes);
+      settingsModal.classList.remove('open');
+    }catch(err){ reportFailure(err); }
+    finally{ csvFileInput.value=''; }
+  };
+  reader.onerror=()=>{ reportFailure(new Error(T().err_file)); csvFileInput.value=''; };
+  reader.readAsText(file);
+});
+
+async function loadCache(){
+  const c=await idbGet();
+  let rows=null;
+  if(Array.isArray(c)){ rows=c; meta={syncedAt:null,source:'cache'}; }                           // older cache format
+  else if(c&&Array.isArray(c.rows)){ rows=c.rows; meta={syncedAt:c.syncedAt||null,source:c.source||'cache'}; }
+  if(rows&&rows.length){ boxData=rows; setStatus('success'); }
+  else{ boxData=[]; meta=null; setStatus('empty'); }
+}
+
+// ---------- View ----------
+let byId=new Map(), ids=[], currentMatches=[], suggestionCount=0, typingTimer=null, recentTimer=null;
+const keyOf=x=>String(x).toUpperCase().replace(/\s+/g,'');
+const val=(r,k)=>getFieldValue(r,COLS[k])||'-';
+
+// The index: built once whenever data changes, so each search is a quick lookup instead of reading every box.
+function buildIndex(){
+  byId=new Map();
+  for(const r of boxData){
+    const id=getFieldValue(r,COLS.id); if(!id) continue;
+    const k=keyOf(id), list=byId.get(k);
+    if(list) list.push(r); else byId.set(k,[r]);   // same ID twice = both rows are kept
+  }
+  ids=[...byId.keys()].sort();
+}
+
+function refreshView(){
+  const has=boxData.length>0;
+  buildIndex();
+  searchInput.disabled=!has;
+  searchInput.placeholder=has?'3001/1/1':T().no_data;
+  updateUIStrings();
+  performSearch(searchInput.value,false);
+}
+
+// ---------- Recents ----------
+function loadRecents(){
+  try{ recentSearches=JSON.parse(safeGet(K_RECENTS)||'[]'); if(!Array.isArray(recentSearches)) recentSearches=[]; }catch(e){ recentSearches=[]; }
+  renderRecentPills();
+}
+function addRecentSearch(id){
+  if(!id) return;
+  recentSearches=[id.toUpperCase(),...recentSearches.filter(x=>x.toUpperCase()!==id.toUpperCase())].slice(0,4);
+  safeSet(K_RECENTS,JSON.stringify(recentSearches));
+  renderRecentPills();
+}
+function renderRecentPills(){
+  recentPills.textContent='';
+  recentContainer.classList.toggle('hidden',!recentSearches.length);
+  recentSearches.forEach(id=>{
+    const pill=document.createElement('button');
+    pill.type='button'; pill.className='recent-pill'; pill.textContent=id;
+    pill.addEventListener('click',()=>selectId(id));
+    recentPills.appendChild(pill);
+  });
+}
+
+// ---------- Search & autocomplete ----------
+// Tapping a suggestion or recent: show the result at once and close the phone keyboard.
+function selectId(id){
+  clearTimeout(typingTimer);
+  searchInput.value=id; clearBtn.style.display='block';
+  closeAutocomplete();
+  performSearch(id,true);
+  searchInput.blur();
+}
+
+// Debounce: wait 0.12s after the last key, then search once (not on every letter).
+searchInput.addEventListener('input',()=>{
+  clearBtn.style.display=searchInput.value?'block':'none';
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>{
+    suggestionCount=handleAutocomplete(searchInput.value);
+    performSearch(searchInput.value,false,true);
+  },120);
+});
+// Enter / Go on the phone keyboard.
+searchInput.addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  e.preventDefault(); clearTimeout(typingTimer);
+  closeAutocomplete(); performSearch(searchInput.value,true); searchInput.blur();
+});
+clearBtn.addEventListener('click',()=>{
+  clearTimeout(typingTimer);
+  searchInput.value=''; clearBtn.style.display='none'; closeAutocomplete(); performSearch('',false); searchInput.focus();
+});
+document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrapper')) closeAutocomplete(); });
+function closeAutocomplete(){ dropdown.style.display='none'; dropdown.textContent=''; }
+
+// Suggestions: IDs that START with what was typed (max 4). Returns how many were shown.
+function handleAutocomplete(query){
+  closeAutocomplete();
+  const q=keyOf(query.trim());
+  if(q.length<2||!ids.length) return 0;
+  let lo=0, hi=ids.length;                       // binary search: jump to the first ID >= q
+  while(lo<hi){ const mid=(lo+hi)>>1; if(ids[mid]<q) lo=mid+1; else hi=mid; }
+  const found=[];
+  for(let i=lo;i<ids.length&&found.length<4&&ids[i].startsWith(q);i++) found.push(ids[i]);
+  if(!found.length||(found.length===1&&found[0]===q)) return 0;   // nothing to suggest, or already an exact match
+  found.forEach(k=>{
+    const label=getFieldValue(byId.get(k)[0],COLS.id);
+    const row=document.createElement('div'); row.className='autocomplete-item'; row.setAttribute('role','button');
+    const a=document.createElement('span'); a.textContent=label;      // textContent: sheet data is never read as code
+    const b=document.createElement('span'); b.style.cssText='font-size:11px;color:var(--text-muted)'; b.textContent='›';
+    row.append(a,b);
+    row.addEventListener('click',()=>selectId(label));
+    dropdown.appendChild(row);
+  });
+  dropdown.style.display='block';
+  return found.length;
+}
+
+function showDuplicates(rows){
+  const box=$('dup-warning'), list=$('dup-list');
+  list.textContent='';
+  box.classList.toggle('hidden',rows.length<2);
+  if(rows.length<2) return;
+  const t=T();
+  setTxt('dup-title',fill(t.dup_title,{n:rows.length}));
+  rows.forEach((r,i)=>{
+    const d=document.createElement('div'), tab=r['_SHEET_TAB'];
+    d.textContent=`${i+1}. ${t.rack} ${val(r,'rack')} · ${t.shelf} ${val(r,'shelf')} · ${t.room} ${val(r,'room')} · ${t.level} ${val(r,'level')}`+(tab?` (${tab})`:'');
+    list.appendChild(d);
+  });
+}
+
+function performSearch(query,isExactSelect=false,typing=false){
+  const raw=query.trim(), t=T();
+  clearTimeout(recentTimer);
+  [stateNoData,stateInitial,stateNotFound,stateFound].forEach(x=>x.classList.add('hidden'));
+  currentMatches=[];
+  if(!boxData.length){ stateNoData.classList.remove('hidden'); return; }   // never show a location without real data
+  if(!raw){ stateInitial.classList.remove('hidden'); return; }
+
+  const rows=byId.get(keyOf(raw));
+  if(rows){
+    currentMatches=rows;
+    const first=rows[0], id=getFieldValue(first,COLS.id)||raw;
+    stateFound.classList.remove('hidden');
+    $('res-box-id').textContent=id;
+    $('res-rack').textContent=val(first,'rack');
+    $('res-shelf').textContent=val(first,'shelf');
+    $('res-room').textContent=val(first,'room');
+    $('res-level').textContent=val(first,'level');
+    $('res-sheet-tab').textContent=first['_SHEET_TAB']||t.main_sheet;
+    showDuplicates(rows);
+    if(isExactSelect) addRecentSearch(id);
+    else if(typing) recentTimer=setTimeout(()=>addRecentSearch(id),800);   // typed a full ID and paused: remember it
+  }else if(typing&&(suggestionCount>0||raw.length<2)){
+    stateInitial.classList.remove('hidden');   // still typing: no "not found" yet
+  }else{
+    stateNotFound.classList.remove('hidden');
+    $('not-found-msg').textContent=fill(t.not_found_msg,{query:raw});
+    const d=$('not-found-diag');
+    d.textContent=fill(t.diag,{n:boxData.length,headers:Object.keys(boxData[0]).join(', ')});
+    d.classList.remove('hidden');
+  }
+}
+
+// ---------- Copy ----------
+$('copy-location-btn').addEventListener('click',()=>{
+  if(!currentMatches.length) return;
+  const t=T();
+  const text=currentMatches.map(r=>`BOX_ID: ${val(r,'id')}\n${t.rack}: ${val(r,'rack')}\n${t.shelf}: ${val(r,'shelf')}\n${t.room}: ${val(r,'room')}\n${t.level}: ${val(r,'level')}`).join('\n\n');
+  const p=navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject(new Error('no clipboard'));
+  p.then(()=>{
+    const span=$('i18n-copy-btn');
+    span.textContent=T().copied_btn;
+    setTimeout(()=>{ span.textContent=T().copy_btn; },2000);
+  }).catch(()=>alert(T().copy_fail));
+});
+
+// ---------- Settings modal ----------
+const openSettings=()=>settingsModal.classList.add('open');
+const closeSettings=()=>settingsModal.classList.remove('open');
+$('open-settings-btn').addEventListener('click',openSettings);
+$('nodata-settings-btn').addEventListener('click',openSettings);
+$('close-settings-btn').addEventListener('click',closeSettings);
+settingsModal.addEventListener('click',e=>{ if(e.target===settingsModal) closeSettings(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSettings(); });
+
+// ---------- Init ----------
+window.addEventListener('DOMContentLoaded',async()=>{
+  setTheme(safeGet(K_THEME)||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+  currentLang=safeGet(K_LANG)==='ms'?'ms':'en';
+  setLang(currentLang);
+  loadRecents();
+  await loadCache();
+  refreshView();
+  const url=safeGet(K_URL);
+  if(url){ sheetUrlInput.value=url; syncFromUrl(url,false); }
+  setTimeout(()=>{ if(!searchInput.disabled) searchInput.focus(); },300);
+});
+
+// Service worker: lets the app open with no signal. Needs https (or localhost) and sw.js saved beside this file.
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
